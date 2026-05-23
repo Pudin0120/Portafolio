@@ -3,7 +3,7 @@
 General project portfolio by Joseff Antonio Laverde Avendaño. This repository groups applications, utilities, games, algorithm exercises, management systems, web projects, backend services, Android projects, and academic work in one place.
 
 ## Author
-Joseff Antonio Laverde Avendano
+Joseff Antonio Laverde Avendaño
 
 ## How To Use This Portfolio
 1. Review the project list on this page.
