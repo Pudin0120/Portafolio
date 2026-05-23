@@ -1,0 +1,200 @@
+version: '3'
+
+vars:
+  DEV_COMPOSE: infisical run -- docker compose -f docker-compose.dev.yml
+  PROD_COMPOSE: docker compose -f docker-compose.prod.yml
+  INFISICAL: infisical run --
+
+tasks:
+  # ============================================
+  # DESARROLLO (dev-)
+  # ============================================
+
+  dev-up:
+    desc: Inicia servicios en modo desarrollo
+    cmds:
+      - echo " Iniciando servicios en modo DESARROLLO con Infisical..."
+      - "{{.DEV_COMPOSE}} up -d --build"
+      - echo ""
+      - echo "OK Servicios iniciados!"
+
+  dev-init:
+    desc: Inicia desarrollo, espera healthcheck y ejecuta seed
+    cmds:
+      - task: dev-up
+      - echo " Esperando a que el backend responda..."
+      - |
+        for i in $(seq 1 30); do
+          if curl -fsS http://localhost/health >/dev/null 2>&1; then
+            echo "OK Backend listo"
+            exit 0
+          fi
+          echo "   intento $i/30..."
+          sleep 2
+        done
+        echo "ERROR Backend no respondio"
+        exit 1
+      - task: dev-seed
+
+  dev-down:
+    desc: Detiene servicios de desarrollo (usa task dev-down -- -v para borrar volumenes)
+    cmds:
+      - echo " Deteniendo servicios de desarrollo..."
+      - docker compose -f docker-compose.dev.yml down {{.CLI_ARGS}}
+
+  dev-stop:
+    desc: Pausa los contenedores de desarrollo sin borrarlos
+    cmds:
+      - echo "  Pausando contenedores de desarrollo..."
+      - docker compose -f docker-compose.dev.yml stop
+
+  dev-start:
+    desc: Reanuda los contenedores de desarrollo pausados
+    cmds:
+      - echo "  Reanudando contenedores de desarrollo..."
+      - docker compose -f docker-compose.dev.yml start
+
+  dev-logs:
+    desc: Muestra logs de desarrollo
+    cmds:
+      - docker compose -f docker-compose.dev.yml logs -f
+
+  dev-rebuild:
+    desc: Reconstruye e inicia servicios de desarrollo
+    cmds:
+      - echo " Reconstruyendo servicios de desarrollo..."
+      - "{{.DEV_COMPOSE}} up -d --build --force-recreate"
+
+  dev-ps:
+    desc: Muestra estado de contenedores en desarrollo
+    cmds:
+      - docker compose -f docker-compose.dev.yml ps
+
+  dev-shell:
+    desc: Abre una shell dentro del contenedor backend
+    cmds:
+      - docker exec -it fastapi-backend-dev sh
+
+  dev-test:
+    desc: Ejecuta tests en el contenedor backend
+    cmds:
+      - echo " Ejecutando tests..."
+      - docker exec -it fastapi-backend-dev pytest {{.CLI_ARGS}}
+
+  dev-seed:
+    desc: Ejecuta el seed en desarrollo
+    cmds:
+      - echo " Ejecutando seed en desarrollo..."
+      - "{{.DEV_COMPOSE}} exec backend python seed.py"
+
+  dev-backup:
+    desc: Crea un backup de la base de datos de desarrollo
+    cmds:
+      - echo " Creando backup de la BD de desarrollo..."
+      - chmod +x scripts/backup_db.sh
+      - "{{.INFISICAL}} ./scripts/backup_db.sh desarrollo"
+
+  dev-restore:
+    desc: Restaura la base de datos de desarrollo desde un backup
+    cmds:
+      - echo " Restaurando BD de desarrollo..."
+      - chmod +x scripts/restore_db.sh
+      - |
+        read -p "Ruta del backup: " BACKUP_FILE
+        {{.INFISICAL}} ./scripts/restore_db.sh desarrollo $BACKUP_FILE
+
+  # ============================================
+  # PRODUCCION (prod-)
+  # ============================================
+
+  prod-verify:
+    desc: Verifica configuration antes de desplegar
+    cmds:
+      - ./scripts/verify_setup.sh
+
+  prod-up:
+    desc: Inicia servicios en modo produccion
+    deps: [prod-verify]
+    cmds:
+      - |
+        read -p "  Desplegar en PRODUCCION? (yes/no): " confirm
+        if [ "$confirm" = "yes" ]; then
+          {{.PROD_COMPOSE}} up -d --build
+          echo "OK Desplegado con exito"
+        else
+          echo "ERROR Cancelado"
+        fi
+
+  prod-down:
+    desc: Detiene servicios de produccion
+    cmds:
+      - echo " Deteniendo produccion..."
+      - "{{.PROD_COMPOSE}} down"
+
+  prod-logs:
+    desc: Muestra logs de produccion
+    cmds:
+      - "{{.PROD_COMPOSE}} logs -f"
+
+  prod-ps:
+    desc: Muestra estado de contenedores en produccion
+    cmds:
+      - "{{.PROD_COMPOSE}} ps"
+
+  prod-seed:
+    desc: Ejecuta el seed en produccion
+    cmds:
+      - echo " Ejecutando seed en produccion..."
+      - "{{.PROD_COMPOSE}} exec backend python seed.py"
+
+  prod-backup:
+    desc: Crea un backup de la base de datos de produccion
+    cmds:
+      - echo " Creando backup de PRODUCCION..."
+      - chmod +x scripts/backup_db.sh
+      - ./scripts/backup_db.sh produccion
+
+  prod-restore:
+    desc: Restaura la base de datos de produccion
+    cmds:
+      - echo " Restaurando BD de PRODUCCION..."
+      - chmod +x scripts/restore_db.sh
+      - |
+        read -p "Ruta del backup: " BACKUP_FILE
+        ./scripts/restore_db.sh produccion $BACKUP_FILE
+
+  # ============================================
+  # UTILIDADES
+  # ============================================
+
+  setup-auth:
+    desc: Genera .htpasswd para Traefik
+    cmds:
+      - ./scripts/setup-basic-auth.sh
+
+  clean:
+    desc: Limpia docker (CUIDADO!)
+    cmds:
+      - |
+        read -p "  Borrar TODO? (s/N): " confirm
+        if [ "$confirm" = "s" ]; then
+          {{.DEV_COMPOSE}} down -v
+          {{.PROD_COMPOSE}} down -v
+          docker system prune -af
+        fi
+
+  # ============================================
+  # ALIASES
+  # ============================================
+  dev:
+    cmds: [task: dev-up]
+  stop:
+    cmds: [task: dev-stop]
+  start:
+    cmds: [task: dev-start]
+  logs:
+    cmds: [task: dev-logs]
+  test:
+    cmds: [task: dev-test]
+  ps:
+    cmds: [task: dev-ps]

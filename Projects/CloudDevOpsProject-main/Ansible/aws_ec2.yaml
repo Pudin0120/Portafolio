@@ -1,0 +1,12 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1
+filters:
+  tag:Name: 
+    - jenkins-master
+    - jenkins-worker
+keyed_groups:
+  - key: tags.Name
+    prefix: tag
+hostnames:
+  - network-interface.association.public-ip

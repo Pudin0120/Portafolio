@@ -1,0 +1,92 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+
+    @*Easyui*@
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+    <link href="~/Content/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="bookmark" href="/favicon.ico" />
+
+    @*cssjs*@
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <script src="~/Content/Site.js"></script>
+</head>
+<body class="easyui-layout">
+    <div region="north" id="header">
+        <img src="~/Content/image/Medicine.png" id="logo" />
+        <h1 id="title">(Beta)</h1>
+        <a href="../User/Logout"><img style="float: right;margin-top: 50px;margin-right: 20px;" src="~/Content/image/logout.png" /></a>
+    </div>
+    <div region="west" class="easyui-panel" title="" split="true" style="width:220px">
+        <div class="easyui-accordion" data-options="fit:true,border:true">
+            <div title="" data-options="iconCls:'icon-information'" style="overflow:auto;padding:10px;">
+                <ul class="easyui-tree">
+                    <li><a href="#" onclick="addTab('', '../PSS_InWarehouseMode/Index')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../PSS_ExWarehouseMode/Index')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../PSS_PurchaseCompany/Index')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../PHA_Orgin/Index')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../PHA_Repository/Index')"></a></li>
+                </ul>
+            </div>
+            <div title="" data-options="iconCls:'icon-pill'" style="padding:10px;">
+                <ul class="easyui-tree">
+                    <li><a href="#" onclick="addTab('', '../DrugManagement/DrugInfo')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../PHA_Accounts/PhaAccounts')"></a></li>
+                </ul>
+            </div>
+            <div title="" data-options="iconCls:'icon-buy'" style="padding:10px;">
+                <ul class="easyui-tree">
+                    <li><a href="#" onclick="addTab('', '../PSS_PurchasePlan/PurchasePlan')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../PSS_InWarehouse/InWarehouse')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../PSS_ExWarehouse/ExWarehouse')"></a></li>
+                </ul>
+            </div>
+            <div title="" data-options="iconCls:'icon-Inventory'" style="padding:10px;">
+                <ul class="easyui-tree">
+                    <li><a href="#" onclick="addTab('', '../InHistory/Index')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../ExHistory/Index')"></a></li>
+                </ul>
+            </div>
+            <div title="" data-options="iconCls:'icon-setup'" style="padding:10px;">
+                <ul class="easyui-tree">
+                    <li><a href="#" onclick="addTab('', '../Setup/SqlConn')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../Setup/ModifyPsw')"></a></li>
+                    <li><a href="#" onclick="addTab('', '../Setup/Help')"></a></li>
+                    <li><a href="../User/Logout"></a></li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div data-options="region:'center'">
+        <div id="tabs" class="easyui-tabs" data-options="fit:true,border:false,plain:true">
+            <div title="" style="padding:0 10px 0 10px;text-align:center;">
+                <img id="welcomeimg" src="~/Content/image/welcome.png" />
+            </div>
+        </div>
+    </div>
+    <div region="south" id="footer">
+        <p id="foot">
+              Kontinue maoqyzj@outlook.com
+            @{
+                HttpCookie cookie = Request.Cookies["user"];
+                <span>@cookie.Values["Code"]</span>
+                <span>@HttpUtility.UrlDecode(cookie.Values["Name"])</span>
+                <span>@HttpUtility.UrlDecode(cookie.Values["Role"])</span>
+                <span>@HttpUtility.UrlDecode(cookie.Values["Department"])</span>
+                <span>IP@cookie.Values["IP"]</span>
+            }
+        </p>
+    </div>
+</body>
+</html>

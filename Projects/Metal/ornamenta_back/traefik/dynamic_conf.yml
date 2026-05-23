@@ -1,0 +1,54 @@
+# Traefik Dynamic Configuration
+# Middleware definitions and additional routing rules
+
+http:
+  middlewares:
+    # Security headers
+    secureHeaders:
+      headers:
+        browserXssFilter: true
+        contentTypeNosniff: true
+        frameDeny: true
+        sslRedirect: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+        customFrameOptionsValue: "SAMEORIGIN"
+    
+    # Rate limiting
+    rateLimit:
+      rateLimit:
+        average: 100
+        burst: 50
+        period: 1s
+    
+    # Compress responses
+    compress:
+      compress: {}
+    
+    # Basic Authentication para endpoints sensibles
+    # Users se configuran en .env: TRAEFIK_AUTH_USERS
+    basicAuth:
+      basicAuth:
+        usersFile: /etc/traefik/.htpasswd
+        realm: "Restricted Access"
+        removeHeader: true
+    
+    # Strip /traefik prefix for dashboard
+    dashboard-stripprefix:
+      stripPrefix:
+        prefixes:
+          - /traefik
+
+# TLS options for production
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+        - TLS_AES_128_GCM_SHA256
+        - TLS_AES_256_GCM_SHA384
+        - TLS_CHACHA20_POLY1305_SHA256

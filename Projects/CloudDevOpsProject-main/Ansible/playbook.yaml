@@ -1,0 +1,19 @@
+---
+- name: Setup Jenkins Master
+  hosts: tag_jenkins_master
+  become: true
+  roles:
+    - git
+    - docker
+    - java
+    - jenkins_master
+
+- name: Setup Jenkins worker
+  hosts: tag_jenkins_worker
+  become: true
+  roles:
+    - git
+    - docker
+    - java
+    - trivy
+    - jenkins_slave

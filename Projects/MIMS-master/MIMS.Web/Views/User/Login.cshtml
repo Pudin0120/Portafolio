@@ -1,0 +1,74 @@
+@{
+    Layout = null;
+    ViewBag.Title = "Medicine Management System";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <script src="~/Scripts/jquery-1.4.4.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/Content/login.css" />
+    <script>
+        $(function () {
+            $('#password').keydown(function () {
+                if (event.keyCode == 13) {
+                    $('#submit').click();
+                    return false;
+                }
+            });
+            $('#submit').click(function () {
+                var username = $('#username').val();
+                var password = $('#password').val();
+                if (username == null || username == "") {
+                    alert("Account cannot be empty!");
+                    return false;
+                }
+                if (password == null || password == "") {
+                    alert("Password cannot be empty!");
+                    return false;
+                }
+                $.ajax({
+                    type: 'post',
+                    dataType: "text",
+                    url: '../User/CheckUserLogin',
+                    data: $('#login').serialize(),
+                    cache: false,
+                    async: false,
+                    success: function (msg) {
+                        var message;
+                        if (msg == 1)
+                            message = "Account does not exist!";
+                        else if (msg == 3)
+                            message = "Incorrect password!";
+                        else
+                            window.location.href = "../Home/Index";
+                        $('#msg').text(message);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <form id="login">
+            <h1>Medicine Management System</h1>
+            <fieldset id="inputs" class="">
+                <input id="username" name="username" type="text" placeholder="Account" autofocus="" required="">
+                <input id="password" name="password" type="password" placeholder="" required="">
+            </fieldset>
+            <div id="msg">
+            </div>
+
+            <fieldset id="actions" class="">
+                <input type="button" id="submit" value="">
+                <a href=""></a>
+                <a href="">Administrator</a>
+            </fieldset>
+        </form>
+    </div>
+</body>
+</html>

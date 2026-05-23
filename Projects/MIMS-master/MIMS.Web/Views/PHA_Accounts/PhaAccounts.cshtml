@@ -1,0 +1,461 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>PhaAccounts</title>
+    @*Easyui*@
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+    <link href="~/Content/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/Content/Site.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //datagrid
+            InitGrid();
+            InitControl();
+            InitDialog();
+            InitOriSelectDialog();
+            InitOriDialoggrid();
+            InitPhaSelectDialog();
+            InitPhaDialoggrid();
+            $('#btnReload').click(function () {
+                $("#grid").datagrid("reload");
+            });
+            //ajax
+            $('#ok').click(function () {
+                $('#errdiv').removeClass('dis');
+                $('#form').submit();
+            });
+            $('#cancel').click(function () {
+                $('#dd').dialog('close');
+            });
+            $('#add').click(function () {
+                $('#errdiv').attr('class', 'dis');
+                $('#form')[0].reset();
+                $('#key').val(0);
+                $('#editpha').removeAttr("disabled");
+                $('#editori').removeAttr("disabled");
+                $('#dd').dialog('open');
+            });
+            $('#editori').click(function () {
+                $('#oriselect').dialog('open');
+            });
+            $('#editpha').click(function () {
+                $('#phaselect').dialog('open');
+            });
+            $('#del').click(function () {
+                getAjax("../PHA_Accounts/Del", { phaCode: $('#del_pha').val(), orginID: $('#del_ori').val() }, function (data) {
+                    if ($('#del_ori').val() == null || $('#del_pha').val() == "")
+                        return false;
+                    if (data) {
+                        $.messager.alert('', '!');
+                        $('#dd').dialog('close');
+                        $("#grid").datagrid("reload");
+                        return true;
+                    }
+                    else {
+                        $.messager.alert('', '!');
+                        return false;
+                    }
+                });
+            });
+        });
+
+        //DataGird
+        function InitGrid() {
+            $('#grid').datagrid({
+                url: '../PHA_Accounts/LoadList',
+                singleSelect: true,
+                fit: true,
+                nowrap: true,//
+                autoRowHeight: false,
+                striped: false,     //
+                collapsible: true,      //
+                pagination: true,
+                pageSize: 20,
+                fitColumns: false,       //
+                rownumbers: true,
+                sortName: 'PhaCode',    //easyUI
+                sortOrder: 'asc',
+                remoteSort: true,
+                loadMsg: '',
+                queryParams: ({
+                    pinyin: $('#itemid').val()
+                }),  //
+                columns: [[
+                     { title: '', field: 'PhaCode', hidden: true },
+                     { title: '', field: 'PhaName', width: 120, sortable: true },
+                     { title: '', field: 'Spec', width: 80, sortable: true },
+                     { title: '', field: 'Unit', width: 60, sortable: true, align: 'center' },
+                     { title: '', field: 'PinyinCode', width: 70, sortable: true, align: 'center' },
+                     { title: '', field: 'OrginName', width: 100, sortable: true, align: 'center' },
+                     { title: '', field: 'Stock', width: 80, sortable: true, align: 'center' },
+                     { title: '', field: 'InWarehousePrice', width: 80, sortable: true, align: 'center' },
+                     { title: '', field: 'WholesalePrice', width: 80, sortable: true, align: 'center' },
+                     { title: '', field: 'RetailPrice', width: 90, sortable: true, align: 'center' },
+                     { title: '', field: 'InWarehouseSum', width: 80, sortable: true, align: 'center' },
+                     { title: '', field: 'WholesaleSum', width: 90, sortable: true, align: 'center' },
+                     { title: '', field: 'RetailSum', width: 90, sortable: true, align: 'center' },
+                     { title: '', field: 'CompanyName', width: 160, sortable: true },
+                ]],
+                toolbar: '#tb',
+                onDblClickRow: function (rowIndex, rowData) {
+                    $('#editpha').attr('disabled', 'disabled');
+                    $('#editori').attr('disabled', 'disabled');
+                    //$('#errdiv').attr('class', 'dis');
+                    getAjax("../PHA_Accounts/LoadForm",
+                        { phaCode: rowData['PhaCode'], orginID: rowData['OrginID'] }, function (data) {
+                            var data = eval("(" + data + ")");
+                            SetWebControls(data);
+                            $('#key').val(1);
+                        });
+                    $('#dd').window('open');
+                },
+                onClickRow: function (index, row) {
+                    $('#del_pha').val(row['PhaCode']);
+                    $('#del_ori').val(row['OrginID']);
+                }
+
+            })
+            var p = $('#grid').datagrid('getPager');
+            $(p).pagination({
+                pageSize: 20,
+                pageList: [10, 12, 20, 40, 60, 100, 200],
+                beforePageText: '',
+                afterPageText: '    {pages} ',
+                displayMsg: ' {from} - {to}     {total} ',
+            });
+        };
+
+        function InitDialog() {
+            $('#dd').dialog({
+                title: '',
+                width: 740,
+                height: 220,
+                top: ($(window).height() - 220) * 0.5,      //
+                left: ($(window).width() - 740) * 0.5,
+                closed: true,
+                cache: false,
+                modal: true,
+                buttons: '#dlg-buttons'
+            });
+        }
+
+        //
+        function InitOriDialoggrid() {
+            $('#origrid').datagrid({
+                url: '../PHA_Orgin/LoadList',
+                height: 410,
+                nowrap: true,//
+                autoRowHeight: false,
+                striped: false,     //
+                collapsible: true,      //
+                singleSelect: true,
+                pagination: true,
+                sortName: 'OrginID',    //easyUI
+                sortOrder: 'asc',
+                pageSize: 20,
+                fitColumns: true,       //
+                rownumbers: true,
+                toolbar: '#origrid_tb',
+                queryParams: ({
+                    query: $('#origrid_dir').val()
+                }),
+                columns: [[
+                     { title: '', field: 'OrginID', hidden: true },
+                     { title: '', field: 'OrginName' },
+                     { title: '', field: 'PinyinCode' },
+                     { title: '', field: 'Manufacturer' },
+                ]],
+                onDblClickRow: function (rowIndex, rowData) {
+                    $('#OrginName').val(rowData['OrginName']);
+                    $('#OrginID').val(rowData['OrginID']);
+                    $('#oriselect').dialog('close');
+
+                }
+
+            });
+            var p = $('#origrid').datagrid('getPager');
+            $(p).pagination({
+                pageSize: 20,
+                pageList: [10, 12, 20, 40, 60, 100, 200],
+                beforePageText: '',
+                afterPageText: '    {pages} ',
+                displayMsg: ' {from} - {to}     {total} ',
+            });
+        }
+
+        function InitOriSelectDialog() {
+            $('#oriselect').dialog({
+                title: '',
+                width: 400,
+                height: 450,
+                top: ($(window).height() - 450) * 0.5,      //
+                left: ($(window).width() - 400) * 0.5,
+                closed: true,
+                cache: false,
+                modal: true,
+            });
+        }
+
+
+        //
+        function InitPhaDialoggrid() {
+            $('#phagrid').datagrid({
+                url: '../DrugManagement/LoadList',
+                height: 410,
+                nowrap: true,//
+                autoRowHeight: false,
+                singleSelect: true,
+                striped: false,     //
+                collapsible: true,      //
+                pagination: true,
+                pageSize: 20,
+                fitColumns: true,       //
+                rownumbers: true,
+                sortName: 'PhaCode',    //easyUI
+                sortOrder: 'asc',
+                remoteSort: true,
+                loadMsg: '',
+                queryParams: ({
+                    query: $('#phagrid_dir').val()
+                }),  //
+                columns: [[
+                     { title: '', field: 'PhaCode', hidden: true },
+                     { title: '', field: 'PhaName', width: 120, sortable: true },
+                     { title: '', field: 'Spec', width: 80, sortable: true },
+                     { title: '', field: 'Unit', width: 60, sortable: true, align: 'center' },
+                     { title: '', field: 'PinyinCode', width: 90 }
+                ]],
+                toolbar: '#phagrid_tb',
+                onDblClickRow: function (rowIndex, rowData) {
+                    $('#PhaCode').val(rowData['PhaCode']);
+                    $('#PhaName').val(rowData['PhaName']);
+                    $('#Spec').val(rowData['Spec']);
+                    $('#Unit').val(rowData['Unit']);
+                    $('#PinyinCode').val(rowData['PinyinCode']);
+                    $('#phaselect').dialog('close');
+                }
+            })
+            var p = $('#phagrid').datagrid('getPager');
+            $(p).pagination({
+                pageSize: 20,
+                pageList: [10, 12, 20, 40, 60, 100, 200],
+                beforePageText: '',
+                afterPageText: '    {pages} ',
+                displayMsg: ' {from} - {to}     {total} ',
+            });
+        };
+        function InitPhaSelectDialog() {
+            $('#phaselect').dialog({
+                title: '',
+                width: 500,
+                height: 450,
+                top: ($(window).height() - 450) * 0.5,      //
+                left: ($(window).width() - 500) * 0.5,
+                closed: true,
+                cache: false,
+                modal: true,
+            });
+        }
+
+
+        //
+        function InitControl() {
+            var dataJson = "";
+            getAjax("/PHA_Accounts/LoadSelectComPany", null, function (data) {
+                datajson = eval("(" + data + ")");
+                $.each(datajson, function (i) {
+                    $("#CompanyID").append($("<option></option>").val(datajson[i].CompanyID).html(datajson[i].CompanyName));
+                });
+            })
+        }
+
+    </script>
+    <script>
+        //
+        $(function () {
+            $('#form').validate({
+                rules: {
+                    PhaCode: {
+                        required: true
+                    },
+                    OrginName: {
+                        required: true
+                    },
+                    Stock: {
+                        required: true
+                    },
+                    CompanyID: {
+                        required: true
+                    },
+                    InWarehousePrice: {
+                        required: true
+                    },
+                    RetailPrice: {
+                        required: true
+                    },
+                    WholesalePrice: {
+                        required: true
+                    }
+                },
+                messages: {
+                    PhaCode: "",
+                    OrginName: "",
+                    Stock: "",
+                    CompanyID: "",
+                    InWarehousePrice: "",
+                    RetailPrice: "",
+                    WholesalePrice: ""
+                },
+                errorLabelContainer: '#errdiv>ul',
+                wrapper: 'li',
+                submitHandler: function (form) {
+                    var postData = GetWebControls("#form");
+                    getAjax("/PHA_Accounts/AcceptClick?key=" + $('#key').val(),
+                        postData, function (data) {
+                            if (data) {
+                                //
+                                $.messager.alert('', '!');
+                                $('#dd').dialog('close');
+                                $("#grid").datagrid("reload");
+                                return true;
+                            }
+                            else if (data == -1) {
+                                $.messager.alert('', '');
+                                return false;
+                            }
+                            else {
+                                $.messager.alert('', '!');
+                                return false;
+                            }
+                        });
+                },
+                invalidHandler: function (form, validator) {  //
+                    return false;
+                }
+            });
+        });
+    </script>
+    <style>
+        .dis {
+            display: none;
+        }
+
+        fieldset {
+            border-color: #E0ECFF;
+        }
+
+        .tb-line {
+            margin-bottom: 5px;
+        }
+
+        .tb-col-200 {
+            width: 200px;
+        }
+
+        .tb-col-160 {
+            width: 160px;
+        }
+
+        .tb-col-140 {
+            width: 140px;
+        }
+
+        .tb-col-120 {
+            width: 120px;
+        }
+
+        .tb-col-80 {
+            width: 80px;
+        }
+
+        .tb-col-40 {
+            width: 40px;
+        }
+    </style>
+</head>
+<body style="margin:2px;padding:0">
+    <div>
+        <div style="position:fixed;width:100%;height:100%">
+            <table id="grid"></table>
+        </div>
+        <input id="del_pha" type="hidden" name="del_pha" value="" />
+        <input id="del_ori" type="hidden" name="del_ori" value="" />
+        <div id="tb" style="padding:3px">
+            <a id="add" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'"></a>
+            <a id="del" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-remove'"></a>
+            <a id="btnReload" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-reload'"></a>
+            <span>:</span>
+            <input id="itemid" style="border:1px solid #ccc">
+            <a href="#" class="easyui-linkbutton" plain="true" onclick="InitGrid()"></a>
+        </div>
+    </div>
+
+    <div id="dd" class="easyui-dialog" style="position:relative">
+        <form id="form" name="form" method="post">
+            <input id="key" type="hidden" value="" />
+            <div style="margin:10px">
+                <div class="tb-line">
+                    <span></span><input type="text" id="PhaCode" class="tb-col-120" name="PhaCode" value="" disabled="disabled" />
+                    <input type="button" id="editpha" value="" />
+                    <span></span><input type="text" id="PhaName" class="tb-col-160" name="PhaName" value="" disabled="disabled" />
+                    <span></span><input type="text" id="Spec" name="Spec" class="tb-col-80" value="" disabled="disabled" />
+                    <span></span><input type="text" id="Unit" name="Unit" class="tb-col-40" value="" disabled="disabled" />
+
+                </div>
+                <div class="tb-line">
+                    <span></span><input type="text" id="PinyinCode" name="PinyinCode" class="tb-col-80" value="" disabled="disabled" />
+                    <span></span><input type="text" id="OrginName" name="OrginName" class="tb-col-120" value="" disabled="disabled" />
+                    <input type="hidden" id="OrginID" />
+                    <input type="button" id="editori" value="" />
+                    <span></span><input type="text" id="Stock" name="Stock" class="tb-col-40" value="" />
+                    <span></span><select id="CompanyID" name="CompanyID" class="tb-col-200"></select>
+                </div>
+
+                <div class="tb-line">
+                    <span></span><input type="text" id="InWarehousePrice" name="InWarehousePrice" class="tb-col-120" value="" />
+                    <span></span><input type="text" id="WholesalePrice" name="WholesalePrice" class="tb-col-120" value="" />
+                    <span></span><input type="text" id="RetailPrice" name="RetailPrice" class="tb-col-120" value="" />
+                </div>
+                <div class="tb-line">
+                    <span></span><input type="text" id="InWarehouseSum" name="InWarehouseSum" class="tb-col-120" value="" disabled="disabled" />
+                    <span></span><input type="text" id="WholesaleSum" name="WholesaleSum" class="tb-col-120" value="" disabled="disabled" />
+                    <span></span><input type="text" id="RetailSum" name="RetailSum" class="tb-col-120" value="" disabled="disabled" />
+                </div>
+            </div>
+            <div class="errdiv" id="errdiv">
+                <ul></ul>
+            </div>
+            <div id="dlg-buttons">
+                <a id="ok" href="#" class="easyui-linkbutton" iconcls="icon-ok"></a>
+                <a id="cancel" href="#" class="easyui-linkbutton" iconcls="icon-cancel"></a>
+            </div>
+        </form>
+    </div>
+
+    <div id="oriselect" class="easyui-dialog" style="position:relative">
+        <table id="origrid"></table>
+        <div id="origrid_tb" style="padding:3px">
+            <span>:</span>
+            <input id="origrid_dir" style="border:1px solid #ccc">
+            <a href="#" class="easyui-linkbutton" plain="true" onclick="InitOriDialoggrid()"></a>
+        </div>
+    </div>
+    <div id="phaselect" class="easyui-dialog" style="position:relative">
+        <table id="phagrid"></table>
+        <div id="phagrid_tb" style="padding:3px">
+            <span>:</span>
+            <input id="phagrid_dir" style="border:1px solid #ccc">
+            <a href="#" class="easyui-linkbutton" plain="true" onclick="InitPhaDialoggrid()"></a>
+        </div>
+    </div>
+</body>
+</html>

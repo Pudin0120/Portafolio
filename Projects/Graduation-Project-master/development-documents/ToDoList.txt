@@ -1,0 +1,49 @@
+============================================================
+			ToDoList
+============================================================
+
+1	 +  & 
+
+2	 +  + 
+
+3	git + gradle + jenkins
+
+4	 + SSH & CRUD
+
+5	DjangoXAdmin
+
+6	Websocket
+
+7	android
+
+8	android
+
+9	ResideMenuSlidingMenu
+
+
+
+
+===========================================================
+			ToDoList
+===========================================================
+
+1	
+
+2	SSH
+
+3	WebSocket
+
+4	android
+
+5	CXF WebserviceSSH
+
+6	androidwebservice + json
+
+7	
+
+8	WebSocket
+
+9	Jenkins + maven + git
+
+10WebRTC
+	

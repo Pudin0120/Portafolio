@@ -1,0 +1,16 @@
+# Terraform state files
+*.tfstate
+*.tfstate.backup
+
+# Terraform lock file
+.terraform.lock.hcl
+
+# Terraform working directory
+Terraform/.terraform/
+
+# Private keys - Never push to Git
+Terraform/jenkins-key.pem
+Ansible/jenkins-key.pem
+
+# Public keys 
+Ansible/jenkins-key.pub

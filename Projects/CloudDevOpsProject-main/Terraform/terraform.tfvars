@@ -1,0 +1,9 @@
+project_name       = "ivolve"
+vpc_cidr           = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+azs                = ["us-east-1a", "us-east-1b"]
+cluster_name       = "eks-cluster"
+key_name = "jenkins-key"
+cluster_role_arn   = "arn:aws:iam::171007061090:role/c165670a4268463l10407448t1w171007-LabEksClusterRole-6Koy9Q7WQt02"
+node_role_arn      = "arn:aws:iam::171007061090:role/c165670a4268463l10407448t1w171007061-LabEksNodeRole-QlpS7YTUwBJ5"
+sns_email = "sherifshabanpp00@gmail.com"

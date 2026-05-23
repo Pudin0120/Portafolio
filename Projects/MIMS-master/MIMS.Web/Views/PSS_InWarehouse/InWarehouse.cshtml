@@ -1,0 +1,321 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>InWarehouse</title>
+    @*Easyui*@
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+    <link href="~/Content/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/Content/Site.js"></script>
+    <script src="~/Content/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //datagrid
+            InitGrid();
+            InitDialog();
+            InitControl();
+            $('#btnReload').click(function () {
+                $("#grid").datagrid("reload");
+            });
+            //ajax
+            $('#ok').click(function () {
+                $('#errdiv').removeClass('dis');
+                $('#form').submit();
+            });
+            $('#cancel').click(function () {
+                $('#dd').dialog('close');
+            });
+            $('#add').click(function () {
+                $('#form')[0].reset();
+                $('#key').val(0);
+                $('#IWID').attr('placeholder', 'R++');
+                $('#IWID').removeAttr('disabled');
+                $('#IsIW').removeAttr('disabled');
+                $('#IWWay').removeAttr('disabled');
+                $('#CompanyID').removeAttr('disabled');
+                $('#Receipts').removeAttr('disabled');
+                $('#dd').dialog('open');
+            });
+            $('#edit').click(function () {
+                $('#IWID').attr('disabled','disabled');
+                $('#IWWay').attr('disabled','disabled');
+                $('#CompanyID').attr('disabled','disabled');
+                $('#Receipts').attr('disabled','disabled');
+                getAjax("../PSS_InWarehouse/LoadForm",
+                        { id: $('#del_id').val() }, function (data) {
+                            var data = eval("(" + data + ")");
+                            SetWebControls(data);
+                            $('#old_isiw').val($('#IsIW').val());
+                            if ($('#IsIW').val() == 1)
+                                $('#IsIW').attr('disabled', 'disabled');
+                        });
+                $('#key').val(1);
+                $('#dd').dialog('open');
+            });
+
+            $('#del').click(function () {
+                getAjax("../PSS_InWarehouse/Del", { id: $('#del_id').val() }, function (data) {
+                    if ($('#del_id').val() == null || $('#del_id').val() == "")
+                        return false;
+                    if (data) {
+                        $.messager.alert('', '!');
+                        $('#dd').dialog('close');
+                        $("#grid").datagrid("reload");
+                        return true;
+                    }
+                    else {
+                        $.messager.alert('', '!');
+                        return false;
+                    }
+                });
+            });
+        });
+
+        //DataGird
+        function InitGrid() {
+            $('#grid').datagrid({
+                url: '../PSS_InWarehouse/LoadList',
+                singleSelect: true,
+                fit: true,
+                nowrap: true,//
+                autoRowHeight: false,
+                striped: false,     //
+                collapsible: true,      //
+                pagination: true,
+                pageSize: 20,
+                border: false,
+                fitColumns: true,       //
+                rownumbers: true,
+                columns: [[
+                     { title: '', field: 'IWID' },
+                     { title: '', field: 'Name' },
+                     { title: '', field: 'CompanyName' },
+                     {
+                         title: '', field: 'IsIW',
+                         formatter: function (value, row, index) {
+                             if (value == 1)
+                                 return "";
+                             else
+                                 return "";
+
+                         }
+                     },
+                     {
+                         title: '', field: 'IWDate',
+                         formatter: function (value, row, index) {
+                             if (value != null) {
+                                 var date = value.split(' ');
+                                 return date[0];
+                             }
+                             else
+                                 return "";
+
+                         }
+                     },
+                     { title: '', field: 'OperateNo' },
+                     {
+                         title: '', field: 'OperateDate',
+                         formatter: function (value, row, index) {
+                             var date = value.split(' ');
+                             return date[0];
+                         }
+                     },
+
+                     { title: '', field: 'IWRemark' },
+                ]],
+                toolbar: '#tb',
+                onDblClickRow: function (rowIndex, rowData) {
+                    addTab('-' + rowData['IWID'], '../PSS_InWarehouseDetail/InWarehouseDetail?IWID=' + rowData['IWID']);
+                },
+                onClickRow: function (index, row) {
+                    $('#del_id').val(row['IWID']);
+                }
+            })
+            var p = $('#grid').datagrid('getPager');
+            $(p).pagination({
+                beforePageText: '',
+                afterPageText: '    {pages} ',
+                displayMsg: ' {from} - {to}     {total} ',
+            });
+        };
+
+        //
+        function InitDialog() {
+            $('#dd').dialog({
+                title: '',
+                width: 300,
+                height: 350,
+                top: ($(window).height() - 350) * 0.5,      //
+                left: ($(window).width() - 300) * 0.5,
+                closed: true,
+                cache: false,
+                modal: true,
+                buttons: '#dlg-buttons'
+            });
+        }
+
+        //
+        function InitControl() {
+            var dataJson = "";
+            getAjax("/PHA_Accounts/LoadSelectComPany", null, function (data) {
+                datajson = eval("(" + data + ")");
+                $.each(datajson, function (i) {
+                    $("#CompanyID").append($("<option></option>").val(datajson[i].CompanyID).html(datajson[i].CompanyName));
+                });
+            })
+            dataJson = "";
+            getAjax("/PSS_InWarehouse/LoadSelectInwarehourseMode", null, function (data) {
+                datajson = eval("(" + data + ")");
+                $.each(datajson, function (i) {
+                    $("#IWWay").append($("<option></option>").val(datajson[i].ID).html(datajson[i].Name));
+                });
+            })
+        }
+    </script>
+    <script>
+        //
+        $(function () {
+            $('#form').validate({
+                rules: {
+                    IWID: {
+                        required: true
+                    },
+                    IWWay: {
+                        required: true
+                    },
+                    CompanyID: {
+                        required: true
+                    }
+                },
+                messages: {
+                    IWID: "",
+                    IWWay: "",
+                    CompanyID: "",
+                },
+                errorLabelContainer: '#errdiv>ul',
+                wrapper: 'li',
+                submitHandler: function (form) {
+                    var postData = GetWebControls("#form");
+                    getAjax("/PSS_InWarehouse/AcceptClick",
+                        postData, function (data) {
+                            if (data == 1) {
+                                $.messager.alert('', '!');
+                                $('#dd').dialog('close');
+                                $("#grid").datagrid("reload");
+                                return true;
+                            }
+                            else if (data == -1) {
+                                $.messager.alert('', '!');
+                                return false;
+                            }
+                            else {
+                                $.messager.alert('', '!');
+                                return false;
+                            }
+                        });
+                },
+                invalidHandler: function (form, validator) {  //
+                    return false;
+                }
+            });
+        });
+    </script>
+    <style>
+        .dis {
+            display: none;
+        }
+
+        .td_col-180 {
+            width: 180px;
+        }
+
+        .td_col-185 {
+            width: 185px;
+        }
+    </style>
+</head>
+<body style="margin:2px;padding:0">
+    <div>
+        <input id="del_id" type="hidden" name="del_id" value="" />
+        <div style="position:fixed;width:100%;height:100%">
+            <div id="tabs" class="easyui-tabs" data-options="fit:true,border:false,plain:true">
+                <div title="" style="text-align:center;">
+                    <table id="grid"></table>
+                </div>
+            </div>
+
+        </div>
+        <div id="tb" style="padding:3px">
+            <a id="add" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'"></a>
+            <a id="edit" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-edit'"></a>
+            <a id="del" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-remove'"></a>
+            <a id="btnReload" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-reload'"></a>
+        </div>
+    </div>
+    <div id="dd" class="easyui-dialog">
+        <form id="form" name="form" method="post">
+            <input id="key" type="hidden" value="" />
+            <input id="old_isiw" type="hidden" value="" />
+            <table style="margin:8px">
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="IWID" name="IWID" class="td_col-180" value="" disabled="disabled" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><select id="IWWay" name="IWWay" class="td_col-185" disabled="disabled" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><select id="CompanyID" name="CompanyID" class="td-col-185" disabled="disabled" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="Receipts" name="Receipts" value="" class="td_col-180" disabled="disabled" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td>
+                        <select id="IsIW" name="IsIW" class="td_col-185">
+                            <option value="0"></option>
+                            <option value="1"></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="IWDate" name="IWDate" value="" class="td_col-180" disabled="disabled" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="OperateNo" name="OperateNo" value="" class="td_col-180" disabled="disabled" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="OperateDate" name="OperateDate" value="" class="td_col-180" disabled="disabled" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><textarea id="IWRemark" name="IWRemark" class="td_col-180"></textarea></td>
+                </tr>
+            </table>
+            <div class="errdiv" id="errdiv">
+                <ul></ul>
+            </div>
+            <div id="dlg-buttons">
+                <a id="ok" href="#" class="easyui-linkbutton" iconcls="icon-ok"></a>
+                <a id="cancel" href="#" class="easyui-linkbutton" iconcls="icon-cancel"></a>
+            </div>
+
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+services:
+  traefik:
+    image: traefik:v3.6.1
+    container_name: traefik-prod
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    environment:
+      # Force API version to avoid client/server version mismatch
+      - DOCKER_API_VERSION=1.44
+    ports:
+      - "80:80" # HTTP (redirects to HTTPS)
+      - "443:443" # HTTPS
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.prod.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
+      - ./traefik/.htpasswd:/etc/traefik/.htpasswd:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - app-network
+    restart: always
+    labels:
+      - "traefik.enable=true"
+
+      # Dashboard en subdominio dedicado con Basic Auth
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.serviperfilesayc.com`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.tls=true"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.middlewares=basicAuth@file"
+
+  backend:
+    image: ${BACKEND_IMAGE}
+    container_name: fastapi-backend-prod
+    env_file:
+      - ./.env
+    volumes:
+      - ./firebase-credentials.json:/app/firebase-credentials.json:ro
+    environment:
+      - ENVIRONMENT=production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+
+      # HTTP router - Para redireccionar a HTTPS (excepto ACME challenge)
+      - "traefik.http.routers.backend-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.backend-http.entrypoints=web"
+      - "traefik.http.routers.backend-http.middlewares=redirect-to-https"
+
+      # HTTPS router principal - API publica (sin auth)
+      - "traefik.http.routers.backend-https.rule=Host(`${DOMAIN}`) && !PathPrefix(`/docs`) && !PathPrefix(`/redoc`) && !PathPrefix(`/scalar`) && !PathPrefix(`/openapi.json`)"
+      - "traefik.http.routers.backend-https.entrypoints=websecure"
+      - "traefik.http.routers.backend-https.tls=true"
+      - "traefik.http.routers.backend-https.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backend-https.service=backend-service"
+      - "traefik.http.routers.backend-https.middlewares=secureHeaders@file,compress@file,rateLimit@file"
+
+      # HTTPS router para DOCUMENTACION - Protegido con Basic Auth
+      - "traefik.http.routers.backend-docs.rule=Host(`${DOMAIN}`) && (PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/scalar`) || PathPrefix(`/openapi.json`))"
+      - "traefik.http.routers.backend-docs.entrypoints=websecure"
+      - "traefik.http.routers.backend-docs.tls=true"
+      - "traefik.http.routers.backend-docs.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backend-docs.service=backend-service"
+      - "traefik.http.routers.backend-docs.middlewares=basicAuth@file,secureHeaders@file,compress@file"
+      - "traefik.http.routers.backend-docs.priority=100"
+
+      # Service definition
+      - "traefik.http.services.backend-service.loadbalancer.server.port=8000"
+
+      # Middlewares
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
+
+  db:
+    image: postgres:17-alpine
+    container_name: postgres-db-prod
+    env_file:
+      - ./.env
+    ports:
+      - "127.0.0.1:5432:5432" # Expuesto solo en localhost por seguridad
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      # SQLAlchemy crea las tablas automaticamente, no necesitamos el script SQL
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres_data_prod:
+  traefik_letsencrypt:
+
+networks:
+  app-network:
+    driver: bridge

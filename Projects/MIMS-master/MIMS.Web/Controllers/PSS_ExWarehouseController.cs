@@ -1,0 +1,103 @@
+using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using MIMS.IBusiness;
+using MIMS.Business;
+using MIMS.Entity;
+using Newtonsoft.Json;
+using MIMS.Entity.Model;
+using MIMS.Entity.Dtos;
+
+namespace MIMS.Web.Controllers
+{
+    public class PSS_ExWarehouseController : Controller
+    {
+        IPSS_ExWarehouseBLL ipss_exwarehousebll = new PSS_ExWarehouseBLL();
+        IPSS_ExWarehouseDetailBLL ipss_exwarehousedetailbll = new PSS_ExWarehouseDetailBLL();
+        IPSS_ExWarehouseModeBLL ipss_exwarehousemodebll = new PSS_ExWarehouseModeBLL();
+        IPHA_AccountsBLL ipha_accountsbll = new PHA_AccountsBLL();
+        // GET: PSS_ExWarehouse
+        [RoleActionFilter]
+        public ActionResult ExWarehouse()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult LoadList()
+        {
+            return Json(ipss_exwarehousebll.GetList());
+        }
+
+        [HttpPost]
+        public ActionResult LoadForm(string id)
+        {
+            if (!string.IsNullOrEmpty(id))
+                return Json(ipss_exwarehousebll.GetEntity(id));
+            else
+                return null;
+        }
+
+        [HttpPost]
+        public ActionResult AcceptClick(PSS_ExWarehouse obj)
+        {
+            string key = Request["key"];
+            int old_isew = default(int);
+            int.TryParse(Request["old_isew"], out old_isew);
+            int isOk = default(int);
+            //key1 0
+            if (key == "1")
+            {
+                //
+                if (obj.IsEW == 1 && old_isew == 0)
+                {
+                    //
+                    obj.EWDate = DateTime.Now.ToString("G");
+                    //
+                    Hashtable ht = new Hashtable();
+                    ht.Add("EWID", obj.EWID);
+                    IList list = ipss_exwarehousedetailbll.GetList(ht);
+                    //
+                    foreach (Dto_ExWarehouseDetail item in list)
+                    {
+                        PHA_Accounts a = ipha_accountsbll.GetEntity(item.PhaCode, item.OrginID.ToString());
+                        a.Stock -= item.ExWarehouseNum;
+                        ipha_accountsbll.Update(a);
+                    }
+                }
+                isOk = ipss_exwarehousebll.Update(obj);
+            }
+            else
+            {
+                PSS_ExWarehouse temp = ipss_exwarehousebll.GetEntity(obj.EWID.ToString());
+                if (temp == null)
+                {
+                    HttpCookie cookie = Request.Cookies["user"];
+                    obj.OperateNo = cookie.Values["Code"];
+                    obj.OperateDate = DateTime.Now.ToString("G");
+                    isOk = ipss_exwarehousebll.Insert(obj);
+                }
+                else
+                    isOk = -1;
+            }
+            return Content(isOk.ToString());
+        }
+
+        [HttpPost]
+        public ActionResult Del(string id)
+        {
+            if (!string.IsNullOrEmpty(id))
+                return Content(ipss_exwarehousebll.Delete(new PSS_ExWarehouse { EWID = id }).ToString());
+            else
+                return null;
+        }
+
+        [HttpPost]
+        public ActionResult LoadSelectExwarehourseMode()
+        {
+            return Json(ipss_exwarehousemodebll.GetList());
+        }
+    }
+}

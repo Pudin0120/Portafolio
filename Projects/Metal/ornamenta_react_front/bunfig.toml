@@ -1,0 +1,10 @@
+name = "serviperfiles-react-front"
+
+[scripts]
+dev = "vite"
+build = "vite build"
+preview = "vite preview"
+
+[serve.static]
+plugins = ["bun-plugin-tailwind"]
+env = "BUN_PUBLIC_*"

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5EE9C33D-5E42-426F-8A1B-200B485AB383}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MIMS.Business</RootNamespace>
+    <AssemblyName>MIMS.Business</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Dapper, Version=1.40.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.1.42\lib\net45\Dapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="COM_UserBLL.cs" />
+    <Compile Include="PHA_AccountsBLL.cs" />
+    <Compile Include="PHA_BaseInfoBLL.cs" />
+    <Compile Include="PHA_DispenseWayBLL.cs" />
+    <Compile Include="PHA_DosageFormBLL.cs" />
+    <Compile Include="PHA_OrginBLL.cs" />
+    <Compile Include="PHA_PhaAttrBLL.cs" />
+    <Compile Include="PHA_RepositoryBLL.cs" />
+    <Compile Include="PHA_StorageConditionBLL.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PSS_ExWarehouseBLL.cs" />
+    <Compile Include="PSS_ExWarehouseDetailBLL.cs" />
+    <Compile Include="PSS_ExWarehouseModeBLL.cs" />
+    <Compile Include="PSS_InWarehouseBLL.cs" />
+    <Compile Include="PSS_InWarehouseDetailBLL.cs" />
+    <Compile Include="PSS_InWarehouseModeBLL.cs" />
+    <Compile Include="PSS_PurchaseCompanyBLL.cs" />
+    <Compile Include="PSS_PurchasePlanBLL.cs" />
+    <Compile Include="PSS_PurchasePlanDetailBLL.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MIMS.Entity\MIMS.Entity.csproj">
+      <Project>{6eb934ef-77d9-4a84-a001-deef096814a6}</Project>
+      <Name>MIMS.Entity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MIMS.IBusiness\MIMS.IBusiness.csproj">
+      <Project>{3ecaf333-807b-48ea-acb6-c1404335d01b}</Project>
+      <Name>MIMS.IBusiness</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MIMS.Service\MIMS.Service.csproj">
+      <Project>{add37f07-9f39-43f1-8ba1-28908b4652c5}</Project>
+      <Name>MIMS.Service</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta charset="UTF-8">
+    <title>DrugInfo</title>
+    @*Easyui*@
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+    <link href="~/Content/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/Content/Site.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //datagrid
+            InitGrid();
+            InitDialog();
+            InitControl();
+            $('#btnReload').click(function () {
+                $("#grid").datagrid("reload");
+            });
+            //ajax
+            $('#ok').click(function () {
+                $('#errdiv').removeClass('dis');
+                $('#form').submit();
+            });
+            $('#cancel').click(function () {
+                $('#dd').dialog('close');
+            });
+            $('#add').click(function () {
+                $('#errdiv').attr('class', 'dis');
+                $('#form')[0].reset();
+                $('#key').val(0);
+                $('#PhaCode').removeAttr("disabled");
+                $('#PhaName').removeAttr("disabled");
+                $('#dd').dialog('open');
+            });
+            $('#del').click(function () {
+                getAjax("../DrugManagement/Del", { id: $('#del_id').val() }, function (data) {
+                    if ($('#del_id').val() == null || $('#del_id').val() == "")
+                        return false;
+                    if (data) {
+                        $.messager.alert('', '!');
+                        $('#dd').dialog('close');
+                        $("#grid").datagrid("reload");
+                        return true;
+                    }
+                    else {
+                        $.messager.alert('', '!');
+                        return false;
+                    }
+                });
+            });
+        });
+
+        //DataGird
+        function InitGrid() {
+            $('#grid').datagrid({
+                url: '../DrugManagement/LoadList',
+                fit: true,
+                nowrap: true,//
+                autoRowHeight: false,
+                striped: false,     //
+                collapsible: true,      //
+                singleSelect: true,
+                pagination: true,
+                pageSize: 20,
+                fitColumns: true,       //
+                rownumbers: true,
+                sortName: 'PhaCode',    //easyUI
+                sortOrder: 'asc',
+                remoteSort: true,
+                loadMsg: '',
+                queryParams: ({
+                    query: $('#itemid').val()
+                }),  //
+                columns: [[
+                     { title: '', field: 'PhaCode', hidden: true },
+                     { title: '', field: 'PhaName', width: 120, sortable: true },
+                     { title: '', field: 'Spec', width: 80, sortable: true },
+                     { title: '', field: 'Unit', width: 60, sortable: true, align: 'center' },
+                     { title: '', field: 'DosageName', width: 60, sortable: true, align: 'center' },
+                     {
+                         title: '', field: 'IsSpecial', width: 60, sortable: true, align: 'center',
+                         formatter: function (value, row, index) {
+                             if (value) {
+                                 return "";
+                             } else {
+                                 return "";
+                             }
+                         }
+                     },
+                     { title: '', field: 'RepoName', width: 80, sortable: true, align: 'center' },
+                     { title: '', field: 'PhaAttrName', width: 80, sortable: true, align: 'center' },
+                     { title: '', field: 'PinyinCode', width: 90 },
+                     { title: '', field: 'WubiCode', width: 90 },
+                ]],
+                toolbar: '#tb',
+                onDblClickRow: function (rowIndex, rowData) {
+                    $('#PhaCode').attr('disabled', 'disabled');
+                    $('#PhaName').attr('disabled', 'disabled');
+                    //$('#errdiv').attr('class', 'dis');
+                    getAjax("../DrugManagement/LoadForm",
+                        { id: rowData['PhaCode'] }, function (data) {
+                            var data = eval("(" + data + ")");
+                            SetWebControls(data);
+                        });
+                    $('#key').val(1);
+                    $('#dd').window('open');
+                },
+                onClickRow: function (index, row) {
+                    $('#del_id').val(row['PhaCode']);
+                }
+
+            })
+            var p = $('#grid').datagrid('getPager');
+            $(p).pagination({
+                pageSize: 20,
+                pageList: [10, 12, 20, 40, 60, 100, 200],
+                beforePageText: '',
+                afterPageText: '    {pages} ',
+                displayMsg: ' {from} - {to}     {total} ',
+            });
+        };
+
+        function InitDialog() {
+            $('#dd').dialog({
+                title: '',
+                width: 700,
+                height: 360,
+                top: ($(window).height() - 360) * 0.5,      //
+                left: ($(window).width() - 700) * 0.5,
+                closed: true,
+                cache: false,
+                modal: true,
+                buttons: '#dlg-buttons'
+            });
+        }
+
+
+        //
+        function InitControl() {
+            var dataJson = "";
+            getAjax("/DrugManagement/LoadSelectDosageForm", null, function (data) {
+                datajson = eval("(" + data + ")");
+                $.each(datajson, function (i) {
+                    $("#DosageForm").append($("<option></option>").val(datajson[i].DosageID).html(datajson[i].DosageName));
+                });
+            })
+            dataJson = "";
+            getAjax("/DrugManagement/LoadSelectRepo", null, function (data) {
+                datajson = eval("(" + data + ")");
+                $.each(datajson, function (i) {
+                    $("#Repo").append($("<option></option>").val(datajson[i].RepoID).html(datajson[i].RepoName));
+                });
+            })
+            dataJson = "";
+            getAjax("/DrugManagement/LoadSelecDispenseWay", null, function (data) {
+                datajson = eval("(" + data + ")");
+                $.each(datajson, function (i) {
+                    $("#DispenseWay").append($("<option></option>").val(datajson[i].DispenseWayID).html(datajson[i].DispenseWayName));
+                });
+            })
+            dataJson = "";
+            getAjax("/DrugManagement/LoadSelecSc", null, function (data) {
+                datajson = eval("(" + data + ")");
+                $.each(datajson, function (i) {
+                    $("#StorageCondition").append($("<option></option>").val(datajson[i].StorageConditionID).html(datajson[i].StorageConditionName));
+                });
+            })
+            dataJson = "";
+            getAjax("/DrugManagement/LoadSelectPhaAttr", null, function (data) {
+                datajson = eval("(" + data + ")");
+                $.each(datajson, function (i) {
+                    $("#PhaAttr").append($("<option></option>").val(datajson[i].PhaAttrID).html(datajson[i].PhaAttrName));
+                });
+            })
+        }
+    </script>
+    <script>
+        //
+        $(function () {
+            $('#form').validate({
+                rules: {
+                    PhaName: {
+                        required: true
+                    },
+                    PhaCode: {
+                        required: true
+                    },
+                    Spec: {
+                        required: true
+                    },
+                    Unit: {
+                        required: true
+                    },
+                    DosageForm: {
+                        required: true
+                    }
+                },
+                messages: {
+                    PhaName: "",
+                    PhaCode: "",
+                    Spec: "",
+                    Unit: "",
+                    DosageForm: ""
+                },
+                errorLabelContainer: '#errdiv>ul',
+                wrapper: 'li',
+                submitHandler: function (form) {
+                    var postData = GetWebControls("#form");
+                    getAjax("/DrugManagement/AcceptClick?key=" + $('#key').val(),
+                        postData, function (data) {
+                            if (data) {
+                                //
+                                $.messager.alert('', '!');
+                                $('#dd').dialog('close');
+                                $("#grid").datagrid("reload");
+                                return true;
+                            }
+                            else if (data == -1) {
+                                $.messager.alert('', '!');
+                                return false;
+                            }
+                            else {
+                                $.messager.alert('', '!');
+                                return false;
+                            }
+                        });
+                },
+                invalidHandler: function (form, validator) {  //
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .dis {
+            display: none;
+        }
+
+        fieldset {
+            border-color: #E0ECFF;
+        }
+
+        .tb-line {
+            margin-bottom: 5px;
+        }
+
+        .tb-col-160 {
+            width: 160px;
+        }
+
+        .tb-col-120 {
+            width: 120px;
+        }
+
+        .tb-col-80 {
+            width: 80px;
+        }
+    </style>
+</head>
+<body style="margin:2px;padding:0">
+    <div>
+        <div style="position:fixed;width:100%;height:100%">
+            <table id="grid"></table>
+        </div>
+        <input id="del_id" type="hidden" name="del_id" value="" />
+        <div id="tb" style="padding:3px">
+            <a id="add" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'"></a>
+            <a id="del" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-remove'"></a>
+            <a id="btnReload" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-reload'"></a>
+            <span>:</span>
+            <input id="itemid" style="border:1px solid #ccc">
+            <a href="#" class="easyui-linkbutton" plain="true" onclick="InitGrid()"></a>
+        </div>
+    </div>
+
+    <div id="dd" class="easyui-dialog" style="position:relative">
+        <form id="form" name="form" method="post">
+            <input id="key" type="hidden" value="" />
+            <fieldset>
+                <legend></legend>
+                <div class="tb-line">
+                    <span></span><input type="text" id="PhaCode" class="tb-col-120" name="PhaCode" value="" disabled="disabled" />
+                    <span></span><input type="text" id="PhaName" class="tb-col-160" name="PhaName" value="" disabled="disabled" />
+                    <span></span><input type="text" id="CommonName" class="tb-col-160" name="CommonName" value="" />
+                </div>
+                <div class="tb-line">
+                    <span> </span><input type="text" id="Spec" name="Spec" class="tb-col-80" value="" />
+                    <span> </span><input type="text" id="Unit" name="Unit" class="tb-col-80" value="" />
+                    <span> </span><select id="DosageForm" name="DosageForm" class="tb-col-80"></select>
+                    <span></span><select id="Repo" name="Repo" class="tb-col-80"></select>
+                </div>
+                <div class="tb-line">
+                    <span></span><input type="text" id="PinyinCode" name="PinyinCode" class="tb-col-80" value="" />
+                    <span></span><input type="text" id="WubiCode" name="WubiCode" class="tb-col-80" value="" />
+                    <span></span><input type="checkbox" id="IsSpecial" name="IsSpecial" value="" />
+                    <span></span><input type="checkbox" id="IsAntibiotic" name="IsAntibiotic" value="" />
+                    <span></span><input type="checkbox" id="IsEmergency" name="IsEmergency" value="" />
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend></legend>
+                <div class="tb-line">
+                    <span></span><input type="text" id="MinUnit" class="tb-col-80" name="MinUnit" value="" />
+                    <span></span><input type="text" id="PharmacySpec" class="tb-col-80" name="PharmacySpec" value="" />
+                    <span></span><input type="text" id="PharmacyUnit" class="tb-col-80" name="PharmacyUnit" value="" />
+                    <span></span><input type="text" id="PharmacyPack" class="tb-col-80" name="PharmacyPack" value="" />
+                </div>
+                <div class="tb-line">
+                    <span></span><input type="text" id="MinPack" class="tb-col-80" name="MinPack" value="" />
+                    <span></span><input type="text" id="WardSpec" class="tb-col-80" name="WardSpec" value="" />
+                    <span></span><input type="text" id="WardUnit" class="tb-col-80" name="WardUnit" value="" />
+                    <span></span><input type="text" id="WardPack" class="tb-col-80" name="WardPack" value="" />
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend></legend>
+                <div class="tb-line">
+                    <span></span><select id="DispenseWay" name="DispenseWay" class="tb-col-80"></select>
+                    <span></span><select id="PhaAttr" name="PhaAttr" class="tb-col-80"></select>
+                    <span></span><select id="StorageCondition" name="StorageCondition" class="tb-col-80"></select>
+                    <span></span><input type="checkbox" id="IsValid" name="IsValid" value="" />
+                </div>
+            </fieldset>
+            <div class="errdiv" id="errdiv">
+                <ul></ul>
+            </div>
+            <div id="dlg-buttons">
+                <a id="ok" href="#" class="easyui-linkbutton" iconcls="icon-ok"></a>
+                <a id="cancel" href="#" class="easyui-linkbutton" iconcls="icon-cancel"></a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

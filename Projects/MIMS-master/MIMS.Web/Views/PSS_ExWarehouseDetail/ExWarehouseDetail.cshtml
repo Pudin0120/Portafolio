@@ -1,0 +1,332 @@
+@{
+    Layout = null;
+}
+@model MIMS.Entity.Model.PSS_ExWarehouse
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ExWarehouseDetail</title>
+    @*Easyui*@
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+    <link href="~/Content/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="bookmark" href="/favicon.ico" />
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    @*cssjs*@
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <script src="~/Content/My97DatePicker/WdatePicker.js"></script>
+    <script src="~/Content/Site.js"></script>
+    <script>
+    $(function () {
+        var status = @Model.IsEW;
+            var msg = "";
+            if(status == 1)
+                msg = "";
+            else
+                msg = "";
+            var EWDate = '@Model.EWDate';
+            if(EWDate == null || EWDate == '')
+                $('#EWDate').text('');
+            else
+                $('#EWDate').text('@Model.EWDate');
+
+        $('#IsEW').text(msg);
+        if(status != 0)
+        {
+            $('#body').layout('remove', 'west');
+        }
+        else
+        {
+            InitPhaDialoggrid();
+        }
+        InitGrid();
+        InitDialog();
+        $('#ok').click(function () {
+            $('#errdiv').removeClass('dis');
+            $('#form').submit();
+        });
+        $('#cancel').click(function () {
+            $('#dd').dialog('close');
+        });
+    });
+
+    //DataGird
+    function InitGrid() {
+        $('#grid').datagrid({
+            url: '../PSS_ExWarehouseDetail/LoadList',
+            singleSelect: true,
+            fit: true,
+            nowrap: true,//
+            autoRowHeight: false,
+            striped: false,     //
+            collapsible: true,      //
+            pagination: true,
+            pageSize: 20,
+            fitColumns: true,       //
+            rownumbers: true,
+            sortName: 'ID',    //easyUI
+            sortOrder: 'asc',
+            remoteSort: true,
+            loadMsg: '',
+            queryParams: ({
+                query:'@Model.EWID'
+            }),  //
+            columns: [[
+                 { title: '', field: 'ID', hidden: true },
+                 { title: '', field: 'PhaCode', hidden: true },
+                 { title: '', field: 'EWID', hidden: true },
+                 { title: '', field: 'PhaName', sortable: true},
+                 { title: '', field: 'Spec', sortable: true },
+                 { title: '', field: 'Unit',  sortable: true, align: 'center' },
+                 { title: '', field: 'PinyinCode',sortable: true, align: 'center' },
+                 { title: '', field: 'OrginName', sortable: true, align: 'center' },
+                 { title: '', field: 'ExWarehouseNum', sortable: true, align: 'center' },
+                 { title: '', field: 'Stock',  sortable: true, align: 'center' },
+                 { title: '', field: 'CompanyName',sortable: true },
+            ]],
+            onDblClickRow: function (rowIndex, rowData) {
+
+            },
+            onClickRow: function (index, row) {
+                $('#del_id').val(row['ID']);
+            }
+
+        })
+        var p = $('#grid').datagrid('getPager');
+        $(p).pagination({
+            pageSize: 20,
+            pageList: [10, 12, 20, 40, 60, 100, 200],
+            beforePageText: '',
+            afterPageText: '    {pages} ',
+            displayMsg: ' {from} - {to}     {total} ',
+            buttons: [{
+                iconCls:'icon-remove',
+                handler:function(){
+                    if(@Model.IsEW == 0){
+                        getAjax("../PSS_ExWarehouseDetail/Del", { id: $('#del_id').val() }, function (data) {
+                            if ($('#del_id').val() == null || $('#del_id').val() == "")
+                                return false;
+                            if (data) {
+                                $.messager.alert('', '!');
+                                $('#dd').dialog('close');
+                                $("#grid").datagrid("reload");
+                                return true;
+                            }
+                            else {
+                                $.messager.alert('', '!');
+                                return false;
+                            }
+                        });
+                    }
+                    else
+                        alert("");
+
+                }
+            }]
+        });
+    };
+
+    //
+    function InitPhaDialoggrid() {
+        $('#phagrid').datagrid({
+            url: '../PHA_Accounts/LoadList?',
+            fit: true,
+            nowrap: true,//
+            autoRowHeight: false,
+            singleSelect: true,
+            striped: false,     //
+            collapsible: true,      //
+            pagination: true,
+            pageSize: 20,
+            fitColumns: true,       //
+            rownumbers: true,
+            sortName: 'PhaCode',    //easyUI
+            sortOrder: 'asc',
+            remoteSort: true,
+            loadMsg: '',
+            queryParams: ({
+                pinyin: $('#phagrid_dir').val()
+            }),  //
+            columns: [[
+                 { title: '', field: 'PhaCode', hidden: true },
+                 { title: '', field: 'PhaName', sortable: true },
+                 { title: '', field: 'Spec', sortable: true },
+                 { title: '', field: 'Unit', sortable: true, },
+                 { title: '', field: 'OrginName' },
+                 { title: '', field: 'Stock' }
+            ]],
+            toolbar: '#phagrid_tb',
+            onDblClickRow: function (rowIndex, rowData) {
+                //$('#errdiv').attr('class', 'dis');
+                $('#ExWarehouseNum').val("");
+                getAjax("../PHA_Accounts/LoadForm",
+                    { phaCode: rowData['PhaCode'], orginID: rowData['OrginID'] }, function (data) {
+                        var data = eval("(" + data + ")");
+                        SetWebControls(data);
+                    });
+                $('#dd').dialog('open');
+            }
+        })
+        var p = $('#phagrid').datagrid('getPager');
+        $(p).pagination({
+            pageSize: 20,
+            pageList: [10, 12, 20, 40, 60, 100, 200],
+            beforePageText: '',
+            afterPageText: '    {pages} ',
+            displayMsg: ' {from} - {to}     {total} ',
+        });
+    };
+
+    //
+    function InitDialog() {
+        $('#dd').dialog({
+            title: '',
+            width: 500,
+            height: 160,
+            top: ($(window).height() - 160) * 0.5,      //
+            left: ($(window).width() - 500) * 0.5,
+            closed: true,
+            cache: false,
+            modal: true,
+            buttons: '#dlg-buttons'
+        });
+    }
+    </script>
+    <script>
+        //
+        $(function () {
+            $('#form').validate({
+                rules: {
+                    ExWarehouseNum: {
+                        required: true
+                    }
+                },
+                messages: {
+                    ExWarehouseNum: ""
+                },
+                errorLabelContainer: '#errdiv>ul',
+                wrapper: 'li',
+                submitHandler: function (form) {
+                    var stock = $('#Stock').val();
+                    var get = $('#ExWarehouseNum').val();
+                    if(parseFloat(get) > parseFloat(stock)){
+                        $.messager.alert('', '!');
+                        $('#ExWarehouseNum').val('');
+                        return false;
+                    }
+                    var postData = GetWebControls("#form");
+                    getAjax("/PSS_ExWarehouseDetail/AcceptClick",
+                        postData, function (data) {
+                            if (data) {
+                                $.messager.alert('', '!');
+                                $('#dd').dialog('close');
+                                $("#grid").datagrid("reload");
+                                return true;
+                            }
+                            else {
+                                $.messager.alert('', '!');
+                                return false;
+                            }
+                        });
+                },
+                invalidHandler: function (form, validator) {  //
+                    return false;
+                }
+            });
+        });
+    </script>
+    <style>
+        .dis {
+            display: none;
+        }
+
+        .tb-col-120 {
+            width: 120px;
+        }
+
+        .tb-col-80 {
+            width: 80px;
+        }
+
+        #errdiv {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body class="easyui-layout" id="body">
+    <div id="left_part" data-options="region:'west'" style="float:left;width:375px;">
+        <div id="phaselect">
+            <div style="position:fixed;width:375px;height:100%;">
+                <table id="phagrid"></table>
+            </div>
+            <div id="phagrid_tb" style="padding:3px">
+                <span>:</span>
+                <input id="phagrid_dir" style="border:1px solid #ccc">
+                <a href="#" class="easyui-linkbutton" plain="true" onclick="InitPhaDialoggrid()"></a>
+            </div>
+        </div>
+    </div>
+    <div data-options="region:'center'" style="float:left">
+        <div data-options="region:'north'" style="height:25%;">
+            <h2 style="text-align:center;margin-top:20px;"></h2>
+            <div>
+                <p style="font-weight:900;color:red;font-size:medium;text-align:right;margin-right:20%">
+                    No.<span id="PurchaseNo">@Model.EWID</span>
+                </p>
+                <div style="margin:10px 0 10px 20px ">
+                    <div style="display:inline-block;margin-right:10px"><span style="color:red">@Model.Name</span></div>
+                    <div style="display:inline-block;margin-right:10px"><span id="IsEW" style="color:red"></span></div>
+                    <div style="display:inline-block;margin-right:10px"><span id="EWDate" style="color:red"></span></div>
+                    <div style="display:inline-block;margin-right:10px"><span style="color:red">@Model.OperateNo</span></div>
+                    <div style="display:inline-block;margin-right:10px;margin-top:10px"><span style="color:red">@Model.OperateDate</span></div>
+                </div>
+                <div style="margin:0 0 10px 20px">
+                    <p id="OperateNo">@Model.Remark</p>
+                </div>
+            </div>
+        </div>
+        <div data-options="region:'south'" style="height:70%">
+            <table id="grid"></table>
+            <input id="del_id" type="hidden" name="del_id" value=" " />
+        </div>
+    </div>
+
+    <div id="dd" class="easyui-dialog">
+        <form id="form" name="form" method="post">
+            <input type="hidden" id="EWID" name="EWID" value="@Model.EWID" />
+            <input type="hidden" id="EWWay" name="IWWay" value="@Model.EWWay" />
+            <input type="hidden" id="PhaCode" name="PhaCode" value=" " />
+            <input type="hidden" id="OrginID" name="OrginID" value=" " />
+            <table style="margin:8px">
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="PhaName" name="PhaName" class="tb-col-120" value=" " disabled="disabled" /></td>
+                    <td>:</td>
+                    <td><input type="text" id="Spec" name="Spec" class="tb-col-80" value=" " disabled="disabled" /></td>
+                    <td>:</td>
+                    <td><input type="text" id="Unit" name="Unit" class="tb-col-80" value=" " disabled="disabled" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="OrginName" name="OrginName" class="tb-col-120" value=" " disabled="disabled" /></td>
+                    <td>:</td>
+                    <td><input type="text" id="Stock" name="Stock" class="tb-col-80" value="" disabled="disabled" /></td>
+                    <td>:</td>
+                    <td><input type="text" id="ExWarehouseNum" name="ExWarehouseNum" class="tb-col-80" value="" /></td>
+                </tr>
+            </table>
+            <div class="errdiv" id="errdiv">
+                <ul></ul>
+            </div>
+            <div id="dlg-buttons">
+                <a id="ok" href="#" class="easyui-linkbutton" iconcls="icon-ok"></a>
+                <a id="cancel" href="#" class="easyui-linkbutton" iconcls="icon-cancel"></a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

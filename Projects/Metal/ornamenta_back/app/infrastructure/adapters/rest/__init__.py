@@ -1,0 +1,48 @@
+"""
+REST API routers package.
+"""
+from app.infrastructure.adapters.rest import (
+    admin_router,
+    authorization,
+    dependencies,
+    material_type_router,
+    material_router,
+    inventory_router,
+    material_price_router,
+    measurement_strategy_router,
+    product_router,
+    composite_product_router,
+    quotation_router,
+    roles_router,
+    unit_measure_router,
+    user_router,
+    payroll_router,
+    payroll_history,
+    composition_router,
+    client_router,
+    work_router,
+    task_router,
+)
+
+__all__ = [
+    "admin_router",
+    "authorization",
+    "dependencies",
+    "material_type_router",
+    "material_router",
+    "inventory_router",
+    "material_price_router",
+    "measurement_strategy_router",
+    "product_router",
+    "composite_product_router",
+    "quotation_router",
+    "roles_router",
+    "unit_measure_router",
+    "user_router",
+    "payroll_router",
+    "payroll_history",
+    "composition_router",
+    "client_router",
+    "work_router",
+    "task_router",
+]

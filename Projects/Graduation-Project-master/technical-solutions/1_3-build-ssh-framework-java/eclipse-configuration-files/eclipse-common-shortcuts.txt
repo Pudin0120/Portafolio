@@ -1,0 +1,26 @@
+eclipsea
+
+a
+1alt+/: 
+
+Amain: main alt+/
+
+Bsyso alt+/
+
+2)
+
+ctrl+/
+
+ctrl+shift+/ctrl+shift+\
+
+3ctrl+shift+f
+
+J
+
+4ctrl+shift+o
+
+5ctrl+!	//
+
+6ctrl+alt+ctrl+alt+
+
+7alt+alt+

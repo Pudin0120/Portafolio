@@ -1,0 +1,216 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    @*Easyui*@
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>
+    <link href="~/Content/jquery-easyui-1.4.5/themes/default/easyui.css" rel="stylesheet" />
+    <link href="~/Content/jquery-easyui-1.4.5/themes/icon.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/Content/Site.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            //datagrid
+            InitGrid();
+            InitDialog();
+            $('#btnReload').click(function () {
+                $("#grid").datagrid("reload");
+            });
+            //ajax
+            $('#ok').click(function () {
+                $('#errdiv').removeClass('dis');
+                $('#form').submit();
+            });
+            $('#cancel').click(function () {
+                $('#dd').dialog('close');
+            });
+            $('#add').click(function () {
+                $('#errdiv').attr('class', 'dis');
+                $('#form')[0].reset();
+                $('#CompanyID').val("");
+                $('#dd').dialog('open');
+            });
+            $('#del').click(function () {
+                getAjax("../PSS_PurchaseCompany/Del", { id: $('#del_id').val() }, function (data) {
+                    if ($('#del_id').val() == null || $('#del_id').val() == "")
+                        return false;
+                    if (data) {
+                        $.messager.alert('', '!');
+                        $('#dd').dialog('close');
+                        $("#grid").datagrid("reload");
+                        return true;
+                    }
+                    else {
+                        $.messager.alert('', '!');
+                        return false;
+                    }
+                });
+            });
+        });
+
+        //DataGird
+        function InitGrid() {
+            $('#grid').datagrid({
+                url: '../PSS_PurchaseCompany/LoadList',
+                fit: true,
+                nowrap: true,//
+                autoRowHeight: false,
+                striped: false,     //
+                singleSelect: true,
+                collapsible: true,      //
+                pagination: true,
+                pageSize: 20,
+                fitColumns: true,       //
+                rownumbers: true,
+                columns: [[
+                     { title: '', field: 'CompanyID', hidden: true },
+                     { title: '', field: 'CompanyName', width: 60 },
+                     { title: '', field: 'PinyinCode', width: 20 },
+                     { title: '', field: 'Contact', width: 20 },
+                     { title: '', field: 'Tel', width: 30 },
+                     { title: '', field: 'Address', width: 120 },
+                ]],
+                toolbar: '#tb',
+                onDblClickRow: function (rowIndex, rowData) {
+                    $('#errdiv').attr('class', 'dis');
+                    getAjax("../PSS_PurchaseCompany/LoadForm",
+                        { id: rowData['CompanyID'] }, function (data) {
+                            var data = eval("(" + data + ")");
+                            SetWebControls(data);
+                        });
+                    $('#dd').dialog('open');
+                },
+                onClickRow: function (index, row) {
+                    $('#del_id').val(row['CompanyID']);
+                }
+            })
+            var p = $('#grid').datagrid('getPager');
+            $(p).pagination({
+                beforePageText: '',
+                afterPageText: '    {pages} ',
+                displayMsg: ' {from} - {to}     {total} ',
+            });
+        };
+
+        //
+        function InitDialog() {
+            $('#dd').dialog({
+                title: '',
+                width: 520,
+                height: 230,
+                top: ($(window).height() - 230) * 0.5,      //
+                left: ($(window).width() - 520) * 0.5,
+                closed: true,
+                cache: false,
+                modal: true,
+                buttons: '#dlg-buttons'
+            });
+        }
+    </script>
+    <script>
+        //
+        $(function () {
+            $('#form').validate({
+                rules: {
+                    CompanyName: {
+                        required: true
+                    },
+                    PinyinCode: {
+                        required: true
+                    }
+                },
+                messages: {
+                    CompanyName: "",
+                    PinyinCode: ""
+                },
+                errorLabelContainer: '#errdiv>ul',
+                wrapper: 'li',
+                submitHandler: function (form) {
+                    var postData = GetWebControls("#form");
+                    getAjax("/PSS_PurchaseCompany/AcceptClick",
+                        postData, function (data) {
+                            if (data) {
+                                //
+                                $.messager.alert('', '!');
+                                $('#dd').dialog('close');
+                                $("#grid").datagrid("reload");
+                                return true;
+                            }
+                            else {
+                                $.messager.alert('', '!');
+                                return false;
+                            }
+                        });
+                },
+                invalidHandler: function (form, validator) {  //
+                    return false;
+                }
+            });
+        });
+    </script>
+    <style>
+        .dis {
+            display: none;
+        }
+    </style>
+</head>
+<body style="margin:2px;padding:0">
+    <div>
+        <input id="del_id" type="hidden" name="del_id" value=" " />
+        <div style="position:fixed;width:100%;height:100%">
+            <table id="grid"></table>
+        </div>
+        <div id="tb" style="padding:3px">
+            <a id="add" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'"></a>
+            <a id="del" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-remove'"></a>
+            <a id="btnReload" href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-reload'"></a>
+        </div>
+    </div>
+    <div id="dd" class="easyui-dialog">
+        <form id="form" name="form" method="post">
+            <table style="margin:8px">
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="CompanyID" name="CompanyID" value=" " disabled="disabled" /></td>
+                    <td>:</td>
+                    <td><input type="text" id="CompanyName" name="CompanyName" value="" class="required" /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="PinyinCode" name="PinyinCode" value="" /></td>
+                    <td>:</td>
+                    <td><input type="text" id="Bank" name="Bank" value=" " /></td>
+                </tr>
+                <tr>
+                    <td>Account:</td>
+                    <td><input type="text" id="BankNo" name="BankNo" value=" " /></td>
+                    <td>:</td>
+                    <td><input type="text" id="Contact" name="Contact" value=" " /></td>
+                </tr>
+                <tr>
+                    <td>:</td>
+                    <td><input type="text" id="Tel" name="Tel" value=" " /></td>
+                    <td>:</td>
+                    <td><input type="text" id="Address" name="Address" value=" " /></td>
+                </tr>
+            </table>
+            <div class="errdiv" id="errdiv">
+                <ul></ul>
+            </div>
+            <div id="dlg-buttons">
+                <a id="ok" href="#" class="easyui-linkbutton" iconcls="icon-ok"></a>
+                <a id="cancel" href="#" class="easyui-linkbutton" iconcls="icon-cancel"></a>
+            </div>
+
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>APP Serviperfiles A Y C</title>
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/Logo-192.png" />
+  </head>
+  <body class="min-h-screen bg-background text-foreground">
+    <div id="root">
+      <!-- Loader inicial para evitar pantalla blanca -->
+      <style>
+        .initial-loader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          width: 100vw;
+          font-family: sans-serif;
+          background-color: #ffffff;
+        }
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #e67e22; /* Un naranja para mantener la onda */
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      </style>
+      <div class="initial-loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 1rem; color: #666">Iniciando...</p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,72 @@
+@Library('jenkins-shared-library') _
+
+pipeline {
+    agent { label 'agent-ec2' }
+
+    environment {
+        DOCKER_IMAGE = 'leoughhh/ivolve-app'
+        IMAGE_TAG = "v${BUILD_ID}"
+        FULL_IMAGE = "${DOCKER_IMAGE}:${IMAGE_TAG}"
+        DEPLOYMENT_FILE = 'deployment.yaml'
+        GIT_CREDENTIALS_ID = 'github'
+        APP_REPO = 'https://github.com/Sherif127/CloudDevOpsProject'
+        MANIFESTS_REPO = 'github.com/Sherif127/kubernetes-manifests.git'
+    }
+
+    stages {
+        stage('Checkout App Repo') {
+            steps {
+                checkoutAppRepo(env.APP_REPO, 'main', env.GIT_CREDENTIALS_ID)
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                buildDockerImage(env.FULL_IMAGE)
+            }
+        }
+
+        stage('Scan Docker Image') {
+            steps {
+                scanDockerImage(env.FULL_IMAGE, env.IMAGE_TAG)
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                pushDockerImage(env.FULL_IMAGE)
+            }
+        }
+
+        stage('Delete Local Image') {
+            steps {
+                deleteLocalImage(env.FULL_IMAGE)
+            }
+        }
+
+        stage('Update Kubernetes Manifests') {
+            steps {
+                updateManifestsRepo(env.MANIFESTS_REPO, env.GIT_CREDENTIALS_ID, env.DEPLOYMENT_FILE, env.FULL_IMAGE)
+            }
+        }
+
+        stage('Push Kubernetes Manifests') {
+            steps {
+                pushManifestsRepo(env.MANIFESTS_REPO, env.GIT_CREDENTIALS_ID, env.DEPLOYMENT_FILE)
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "rm -rf manifests-repo"
+            echo 'Pipeline finished!'
+        }
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed!'
+        }
+    }
+}

@@ -1,0 +1,36 @@
+.login-auth-input [data-slot="inner-wrapper"],
+.login-auth-input [data-slot="input"],
+.login-auth-input input {
+  border: 0 !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+.login-auth-input [data-slot="inner-wrapper"]:focus-within,
+.login-auth-input [data-slot="input"]:focus,
+.login-auth-input [data-slot="input"]:focus-visible,
+.login-auth-input input:focus,
+.login-auth-input input:focus-visible {
+  border: 0 !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+.login-auth-input input {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  color: inherit;
+}
+
+.login-auth-input [data-slot="input"] {
+  color: inherit;
+}
+
+.login-auth-input [data-slot="input"]::placeholder,
+.login-auth-input input::placeholder {
+  color: rgb(var(--surface-muted-rgb) / 1);
+  opacity: 1;
+}

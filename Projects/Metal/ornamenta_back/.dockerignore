@@ -1,0 +1,102 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Environment files
+.env
+.env.*
+!.env.example
+.envrc
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+docker-compose.override.yml
+.docker-compose.override.yml
+
+# Traefik (configs are mounted)
+traefik/
+letsencrypt/
+acme.json
+
+# Database
+*.sql
+*.db
+*.sqlite3
+postgres_data/
+
+# Logs
+*.log
+logs/
+
+# Backups
+backups/
+*.backup
+
+# Scripts (not needed in container - EXCEPT specific ones which are needed)
+scripts/*.sh
+!scripts/entrypoint.sh
+!scripts/fix_and_seed_prod.sh
+!scripts/apply_migration_015.sh
+!scripts/verify_prod_fix.sh
+!scripts/verify_test_fix.sh
+Taskfile.yml
+
+# Tests
+tests/
+test_*.py
+*_test.py
+pytest.ini
+.pytest_cache/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+Thumbs.db
+desktop.ini

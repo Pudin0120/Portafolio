@@ -1,0 +1,91 @@
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+.settings/
+*.iml
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+local.properties
+*.pem
+*.key
+*.p12
+*.jks
+
+# Dependencies
+node_modules/
+vendor/
+**/extra-import-packages/
+**/mysql-connector-java-*/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.gradle/
+
+# Build and generated output
+build/
+target/
+bin/
+out/
+dist/
+coverage/
+.next/
+.turbo/
+.cache/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Mobile and IDE generated artifacts
+*.apk
+*.aab
+*.ipa
+*.xcarchive
+nbproject/private/
+
+# Archives and heavy packaged assets
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tgz
+*.msi
+
+# Large design, media, and binary documentation files
+*.psd
+*.wav
+*.mp3
+*.mp4
+*.mov
+*.avi
+*.ppt
+*.pptx
+*.pdf
+*.doc
+*.docx
+*.caj
+*.gz
+*.PcbDoc
+*.PcbLib
+
+# Generated/offline documentation mirrors and caches
+**/AndroidBox0.5/
+**/Cache/
+
+# Database and backup files
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.tmp
+*~

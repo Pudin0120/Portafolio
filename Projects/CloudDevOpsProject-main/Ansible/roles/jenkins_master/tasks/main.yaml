@@ -1,0 +1,141 @@
+---
+- name: Install required dependencies
+  yum:
+    name: wget
+    state: present
+
+- name: Add Jenkins repository
+  get_url:
+    url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+    dest: /etc/yum.repos.d/jenkins.repo
+
+- name: Import Jenkins GPG key
+  rpm_key:
+    key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+    state: present
+
+- name: Install Jenkins
+  yum:
+    name: jenkins
+    state: present
+
+- name: Ensure Jenkins init.groovy.d directory exists
+  file:
+    path: /var/lib/jenkins/init.groovy.d
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0755'
+
+- name: Create Groovy script to disable setup wizard and create admin user
+  copy:
+    dest: /var/lib/jenkins/init.groovy.d/basic-security.groovy
+    owner: jenkins
+    group: jenkins
+    mode: '0644'
+    content: |
+      import jenkins.model.*
+      import hudson.security.*
+      import jenkins.install.InstallState
+
+      def instance = Jenkins.getInstance()
+      def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+      hudsonRealm.createAccount("{{ jenkins_user }}", "{{ jenkins_password }}")
+      instance.setSecurityRealm(hudsonRealm)
+
+      def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+      strategy.setAllowAnonymousRead(false)
+      instance.setAuthorizationStrategy(strategy)
+
+      instance.save()
+
+      Jenkins.instance.setInstallState(InstallState.INITIAL_SETUP_COMPLETED)
+
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: true
+
+- name: Start and enable Jenkins
+  service:
+    name: jenkins
+    state: started
+    enabled: true
+
+- name: Wait for Jenkins to be up and ready
+  uri:
+    url: http://localhost:8080/login
+    status_code: 200
+    timeout: 30
+    validate_certs: no
+  register: jenkins_check
+  until: jenkins_check.status == 200
+  retries: 10
+  delay: 10
+
+- name: Download Jenkins CLI jar
+  get_url:
+    url: http://localhost:8080/jnlpJars/jenkins-cli.jar
+    dest: /tmp/jenkins-cli.jar
+    mode: '0755'
+
+- name: Install Jenkins plugins using CLI
+  shell: >
+    java -jar /tmp/jenkins-cli.jar -s http://localhost:8080 -auth {{ jenkins_user }}:{{ jenkins_password }} install-plugin {{ item }} -deploy
+  args:
+    chdir: /tmp
+  loop:
+    - git
+    - workflow-aggregator
+    - credentials-binding
+    - ssh-slaves
+    - matrix-auth
+    - pipeline-stage-view
+    - pipeline-github-lib
+    - github
+    - junit
+    - email-ext
+    - docker-plugin
+    - pipeline-model-definition
+    - configuration-as-code
+    - ws-cleanup
+    - timestamper
+    - nodejs
+    - pipeline-utility-steps
+    - docker-workflow
+    - git-client
+    - github-branch-source
+    - command-launcher
+    - job-dsl
+    - build-timeout
+    - workflow-multibranch
+    - lockable-resources
+    - workflow-step-api
+    - scm-api
+    - pipeline-input-step
+    - ansicolor
+    - htmlpublisher
+    - pipeline-stage-step
+    - credentials
+  notify: Restart Jenkins
+
+- name: Ensure .ssh directory exists for Jenkins
+  file:
+    path: /home/jenkins/.ssh
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0700'
+
+- name: Copy public key for SSH access (Jenkins master -> slave)
+  copy:
+    src: jenkins-key.pem
+    dest: /home/jenkins/.ssh/authorized_keys
+    owner: jenkins
+    group: jenkins
+    mode: '0600'
+
+- name: Restart Jenkins after plugin installation
+  service:
+    name: jenkins
+    state: restarted

@@ -1,0 +1,180 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  REGISTRY: ghcr.io
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Normalize image name
+        id: image_name
+        run: echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image tag
+        id: meta
+        run: echo "tag=${{ env.REGISTRY }}/${{ steps.image_name.outputs.name }}:main" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to VPS using SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script_stop: false
+          debug: true
+          script: |
+            set -e
+            
+            # Variables
+            DEPLOY_DIR="${{ secrets.APP_PATH }}"
+            REPO_URL="https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git"
+            BACKEND_IMAGE="${{ env.REGISTRY }}/${{ steps.image_name.outputs.name }}:main"
+            
+            echo " Iniciando despliegue en: $DEPLOY_DIR"
+            
+            # Create directorio de despliegue si no existe
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+            
+            # Clonar o actualizar el repositorio
+            if [ -d ".git" ]; then
+              echo " Repositorio existe, actualizando..."
+              git reset --hard HEAD
+              git remote set-url origin "$REPO_URL"
+              git fetch --all
+              git checkout -f main
+              git pull origin main
+            else
+              echo " Clonando repositorio..."
+              git clone "$REPO_URL" .
+            fi
+            
+            # Create el archivo .env a partir de los secrets de GitHub
+            echo " Creando archivo .env..."
+            cat > .env << 'EOF'
+            # PostgreSQL
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            
+            # Firebase
+            FIREBASE_SERVICE_ACCOUNT_KEY_PATH=./firebase-credentials.json
+            FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+            
+            # Manager seeding
+            MANAGER_EMAIL=${{ secrets.MANAGER_EMAIL }}
+            MANAGER_FIREBASE_UID=${{ secrets.MANAGER_FIREBASE_UID }}
+            
+            # Frontend URL para CORS
+            ENVIRONMENT=production
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+            FRONTEND_PROD_URL=${{ secrets.FRONTEND_URL }}
+
+            # Traefik & SSL
+            DOMAIN=${{ secrets.DOMAIN }}
+            LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }}
+            TRAEFIK_DASHBOARD_USERS=${{ secrets.TRAEFIK_DASHBOARD_USERS }}
+            EOF
+
+            printf 'BACKEND_IMAGE=%s\n' "$BACKEND_IMAGE" >> .env
+            
+            # Create el archivo de credenciales de Firebase a partir del secret
+            echo " Creando archivo de credenciales de Firebase..."
+            echo "${{ secrets.FIREBASE_CREDENTIALS_B64 }}" | base64 -d > firebase-credentials.json
+            
+            # Generar archivo .htpasswd para Basic Auth
+            echo " Generando archivo .htpasswd para Basic Auth..."
+            mkdir -p traefik
+            # Escribir el secret y convertir $$ a $ (igual que task setup-auth)
+            echo '${{ secrets.TRAEFIK_DASHBOARD_USERS }}' | sed 's/\$\$/$/g' > traefik/.htpasswd
+            chmod 644 traefik/.htpasswd
+            
+            # Mostrar primeros caracteres para debug (sin mostrar el hash completo)
+            echo " .htpasswd generado (primeros 20 chars): $(head -c 20 traefik/.htpasswd)..."
+            
+            # Verificar archivos criticos
+            echo "OK Verificando archivos criticos..."
+            ls -lh .env firebase-credentials.json traefik/.htpasswd traefik/dynamic_conf.yml traefik/traefik.prod.yml
+            
+            # Verificar que docker compose existe
+            if ! docker compose version &> /dev/null; then
+              echo "ERROR docker compose no esta instalado"
+              exit 1
+            fi
+
+            # Login to GitHub Container Registry for private image pulls
+            echo " Iniciando sesion en GHCR..."
+            echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u "${{ github.repository_owner }}" --password-stdin
+            
+            # Desplegar con Docker Compose (usando archivo de produccion)
+            echo " Deteniendo contenedores anteriores..."
+            docker compose -f docker-compose.prod.yml down || true
+
+            echo " Actualizando imagen del backend..."
+            docker compose -f docker-compose.prod.yml pull backend
+
+            echo " Levantando nuevos contenedores..."
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
+            
+            # Esperar a que los contenedores esten listos
+            echo " Esperando que los contenedores esten listos..."
+            sleep 10
+            
+            # Verificar el estado de los contenedores
+            echo " Estado de los servicios:"
+            docker compose -f docker-compose.prod.yml ps
+            
+            # Mostrar logs de los ultimos 20 segundos para debug
+            echo " Ultimos logs del backend:"
+            docker compose -f docker-compose.prod.yml logs --tail=50 backend
+            
+            # Mostrar logs de Traefik
+            echo " Ultimos logs de Traefik:"
+            docker compose -f docker-compose.prod.yml logs --tail=30 traefik
+
+            
+            # Verificar que los routers esten configurados
+            echo " Verificando configuration de Traefik..."
+            docker exec traefik-prod ls -lh /etc/traefik/.htpasswd /etc/traefik/dynamic_conf.yml || true
+            
+            # Limpiar imagenes de Docker no utilizadas
+            echo " Limpiando imagenes de Docker..."
+            docker image prune -a -f
+            
+            echo "OK Despliegue completed exitosamente."

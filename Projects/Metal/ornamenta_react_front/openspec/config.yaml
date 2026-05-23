@@ -1,0 +1,56 @@
+strict_tdd: true
+context: |
+  serviperfiles-react-front is a Node.js/TypeScript ESM, React, Python project.
+  Detected markers: package.json, tsconfig.json, bun package manager.
+  Package managers: bun.
+  Primary test command: bun run test.
+  Unit tests: package script (bun run test).
+  Integration tests: none.
+  E2E tests: Playwright (npx playwright test).
+rules:
+  proposal:
+    require_problem_statement: true
+  spec:
+    require_acceptance_criteria: true
+  design:
+    require_tradeoffs: true
+  tasks:
+    protect_review_workload: true
+  apply:
+    test_command: "bun run test"
+  verify:
+    test_command: "bun run test"
+testing:
+  detected: "2026-05-18"
+  runner:
+    command: "bun run test"
+    framework: "package script"
+  layers:
+    unit: "package script"
+    integration: ""
+    e2e: "Playwright"
+  commands:
+    unit:
+      - scope: "."
+        command: "bun run test"
+        framework: "package script"
+    integration:
+      []
+    e2e:
+      - scope: "."
+        command: "npx playwright test"
+        framework: "Playwright"
+  coverage:
+    command: ""
+    commands:
+      []
+quality:
+  lint: ""
+  lint_commands:
+    []
+  typecheck: ""
+  typecheck_commands:
+    []
+  format: ""
+  format_commands:
+    []

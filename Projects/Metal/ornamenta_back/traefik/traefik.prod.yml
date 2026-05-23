@@ -1,0 +1,41 @@
+# Traefik Static Configuration - Production Mode
+# With Let's Encrypt SSL, HTTPS redirect, secure dashboard
+
+api:
+  dashboard: true
+  # Dashboard accesible via router con Basic Auth
+
+log:
+  level: DEBUG
+
+accessLog: {}
+
+entryPoints:
+  web:
+    address: ":80"
+    # NO forzar redireccion global - lo haremos por router
+    # Esto permite que el HTTP Challenge funcione
+  
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: alextorrico41@gmail.com
+      storage: /letsencrypt/acme.json
+      # Usar HTTP Challenge - funciona con Cloudflare
+      httpChallenge:
+        entryPoint: web
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: app-network
+  file:
+    filename: /etc/traefik/dynamic_conf.yml
+    watch: true

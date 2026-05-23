@@ -1,0 +1,14 @@
+{
+  "include": [
+    "app",
+    "main.py",
+    "seed.py"
+  ],
+  "extraPaths": [
+    "./.docker-stubs/site-packages",
+    "./app"
+  ],
+  "typeCheckingMode": "basic",
+  "useLibraryCodeForTypes": true,
+  "reportMissingImports": "error"
+}

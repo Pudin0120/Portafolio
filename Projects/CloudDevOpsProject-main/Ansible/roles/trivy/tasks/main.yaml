@@ -1,0 +1,33 @@
+- name: Download Trivy 
+  get_url:
+    url: "https://github.com/aquasecurity/trivy/releases/download/v0.51.1/trivy_0.51.1_Linux-64bit.tar.gz"
+    dest: /tmp/trivy.tar.gz
+
+- name: Extract Trivy archive
+  unarchive:
+    src: /tmp/trivy.tar.gz
+    dest: /tmp/
+    remote_src: yes
+    extra_opts: [--strip-components=0]
+
+- name: Move Trivy binary to /usr/local/bin
+  command: mv /tmp/trivy /usr/local/bin/trivy
+  args:
+    creates: /usr/local/bin/trivy
+  become: true
+
+- name: Ensure Trivy is executable
+  file:
+    path: /usr/local/bin/trivy
+    mode: '0755'
+    state: file
+  become: true
+
+- name: Verify Trivy installation
+  command: /usr/local/bin/trivy --version
+  register: trivy_version_output
+  changed_when: false
+
+- name: Show Trivy version
+  debug:
+    var: trivy_version_output.stdout
