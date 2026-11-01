@@ -25,8 +25,8 @@ public final class PasswordUtil {
     }
 
     public static String hash(String password) {
-        if (password == null || password.length() < 8) {
-            throw new IllegalArgumentException("Password must contain at least 8 characters.");
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty.");
         }
 
         byte[] salt = new byte[SALT_LENGTH_BYTES];
