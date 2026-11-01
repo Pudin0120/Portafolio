@@ -40,9 +40,8 @@ public final class Database {
             Class.forName(driver);
             return DriverManager.getConnection(url, username, password);
         } catch (IOException | ClassNotFoundException | java.sql.SQLException | IllegalStateException exception) {
-            LOGGER.log(Level.SEVERE,
-                    "Database connection failed. Check application.properties and DB_* environment variables.",
-                    exception);
+            LOGGER.severe(
+                    "Database connection failed. Check application.properties and DB_* environment variables.");
             return null;
         }
     }
