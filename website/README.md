@@ -1,50 +1,51 @@
 # Joseff Laverde — Portfolio Website
 
-Sitio profesional desarrollado con Astro, TypeScript y Tailwind CSS, configurado para GitHub Pages dentro de Pudin0120/Portafolio.
+Professional portfolio built with Astro, TypeScript, and Tailwind CSS, configured for GitHub Pages in the Pudin0120/Portafolio repository.
 
-## Stack y versiones declaradas
+## Stack and declared versions
 
-| Tecnología | Versión |
+| Technology | Version |
 | --- | --- |
 | Astro | 7.4.4 |
 | TypeScript | 7.0.2 |
 | Tailwind CSS | 4.3.3 |
 | @tailwindcss/vite | 4.3.3 |
-| Node.js en CI | 24 |
+| Node.js in CI | 24 |
 
-## Ejecutar localmente
+## Run locally
 
-Desde esta carpeta:
+From this directory:
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Compilar y probar
+## Build and preview
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Funcionalidades
+## Features
 
-- Portada responsive con identidad azul noche, cian y dorado.
-- Terminal interactiva: help, about, stack, projects, contact y clear.
-- Catálogo de proyectos con filtros y búsqueda.
-- Fichas estáticas de proyectos.
-- Buscador global Ctrl + K / Cmd + K.
-- Página de contacto.
-- Foco visible y respeto a prefers-reduced-motion.
+- Responsive homepage with a midnight-blue, cyan, and gold visual identity.
+- Curated homepage featuring selected engineering projects rather than the entire archive.
+- Interactive terminal: help, about, stack, projects, contact, and clear.
+- Complete project archive with category filters and search.
+- Static project detail pages.
+- Global search with Ctrl + K / Cmd + K.
+- English-language contact page and navigation.
+- Visible keyboard focus and support for prefers-reduced-motion.
 
-## Publicación en GitHub Pages
+## GitHub Pages deployment
 
-1. Abre el repositorio Pudin0120/Portafolio.
-2. Ve a Settings → Pages.
-3. En Build and deployment → Source, selecciona GitHub Actions.
-4. Guarda y revisa Actions → Deploy portfolio website.
+1. Open the Pudin0120/Portafolio repository.
+2. Go to Settings → Pages.
+3. Under Build and deployment → Source, select GitHub Actions.
+4. Save and check Actions → Deploy portfolio website.
 
-Dirección esperada: https://pudin0120.github.io/Portafolio/
+Expected URL: https://pudin0120.github.io/Portafolio/
 
-El archivo astro.config.mjs ya configura el dominio y la ruta base del repositorio.
+The astro.config.mjs file already sets the site domain and repository base path.
