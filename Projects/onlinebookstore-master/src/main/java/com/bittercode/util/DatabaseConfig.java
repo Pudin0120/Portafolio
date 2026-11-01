@@ -4,27 +4,44 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-class DatabaseConfig {
+final class DatabaseConfig {
 
-    static Properties prop = new Properties();
-    static {
+    private static final Properties PROPERTIES = loadProperties();
 
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        InputStream input = classLoader.getResourceAsStream("application.properties");
+    public static final String DRIVER_NAME = setting("DB_DRIVER", "db.driver", "com.mysql.cj.jdbc.Driver");
+    public static final String DB_URL = setting(
+            "DB_URL", "db.url",
+            PROPERTIES.getProperty("db.host", "jdbc:mysql://localhost")
+                    + ":" + PROPERTIES.getProperty("db.port", "3306")
+                    + "/" + PROPERTIES.getProperty("db.name", "onlinebookstore"));
+    public static final String DB_USER_NAME = setting("DB_USERNAME", "db.username", "");
+    public static final String DB_PASSWORD = setting("DB_PASSWORD", "db.password", "");
 
-        try {
-            prop.load(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private DatabaseConfig() {
     }
 
-    public final static String DRIVER_NAME = prop.getProperty("db.driver");
-    public final static String DB_HOST = prop.getProperty("db.host");
-    public final static String DB_PORT = prop.getProperty("db.port");
-    public final static String DB_NAME = prop.getProperty("db.name");
-    public final static String DB_USER_NAME = prop.getProperty("db.username");
-    public final static String DB_PASSWORD = prop.getProperty("db.password");
-    public final static String CONNECTION_STRING = DB_HOST + ":" + DB_PORT + "/" + DB_NAME;
+    private static Properties loadProperties() {
+        Properties properties = new Properties();
+        try (InputStream input = DatabaseConfig.class.getClassLoader()
+                .getResourceAsStream("application.properties")) {
+            if (input != null) {
+                properties.load(input);
+            }
+        } catch (IOException exception) {
+            throw new ExceptionInInitializerError(
+                    "Unable to read bookstore database configuration: " + exception.getMessage());
+        }
+        return properties;
+    }
 
+    private static String setting(String environmentName, String propertyName, String fallback) {
+        String environmentValue = System.getenv(environmentName);
+        if (environmentValue != null && !environmentValue.trim().isEmpty()) {
+            return environmentValue.trim();
+        }
+        String propertyValue = PROPERTIES.getProperty(propertyName);
+        return propertyValue == null || propertyValue.trim().isEmpty()
+                ? fallback
+                : propertyValue.trim();
+    }
 }
