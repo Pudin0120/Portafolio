@@ -31,7 +31,7 @@ public class UpdateUI {
             return "scattered_clouds";
         else if (condition == 803 || condition == 804)
             return "broken_clouds";
-        return null;
+        return "broken_clouds";
     }
 
     public static String TranslateDay(String dayToBeTranslated, Context context) {
