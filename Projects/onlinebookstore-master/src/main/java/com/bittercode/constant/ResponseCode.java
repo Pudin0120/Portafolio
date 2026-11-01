@@ -12,7 +12,7 @@ public enum ResponseCode {
     BAD_REQUEST(400, "Bad Request, Please Try Again"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error, Try Again!!"),
     DATABASE_CONNECTION_FAILURE(406,
-            "Unable to Connect to DB, Please Check your db credentials in application.properties"),
+            "Unable to connect to the database. Check the DB_* environment variables and JDBC driver."),
     METHOD_NOT_ALLOWED(405, "Requested HTTP method is not supported by this URL"),
 
     ;
