@@ -35,7 +35,7 @@
 				<ul class="navbar-nav">
 					<li class="nav-item active"><a class="nav-link" href="/admin/">Home
 							Page</a></li>
-					<li class="nav-item active"><a class="nav-link" href="/admin/logout">Logout</a></li>
+					<li class="nav-item active"><form action="/admin/logout" method="post" class="mb-0"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><button type="submit" class="nav-link btn btn-link">Logout</button></form></li>
 
 				</ul>
 
