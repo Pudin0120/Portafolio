@@ -2,11 +2,11 @@
 import '../styles/global.css';
 import { projects } from '../data/projects';
 interface Props { title?: string; description?: string; }
-const { title = 'Joseff Laverde | Backend & Full Stack Developer', description = 'Portafolio de Joseff Laverde: desarrollo backend, full stack, APIs y aplicaciones de software.' } = Astro.props;
+const { title = 'Joseff Laverde | Backend & Full Stack Developer', description = 'Joseff Laverde’s software engineering portfolio: backend systems, full stack applications, APIs, and data-driven software.' } = Astro.props;
 const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 ---
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#08111d" /><meta name="description" content={description} />
@@ -16,22 +16,22 @@ const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL :
 <body>
 <div class="site-shell">
 <header class="site-header">
-<a class="brand" href={base} aria-label="Ir al inicio"><span class="brand-mark">JL</span><span>JOSEFF<span class="brand-muted">.DEV</span></span></a>
-<nav class="main-nav" aria-label="Navegación principal"><a href={base}>Inicio</a><a href={`${base}proyectos/`}>Proyectos</a><a href={`${base}contacto/`}>Contacto</a></nav>
-<button class="command-trigger" type="button" id="command-trigger" aria-label="Abrir búsqueda global"><span>Buscar</span><kbd>Ctrl K</kbd></button>
+<a class="brand" href={base} aria-label="Go to homepage"><span class="brand-mark">JL</span><span>JOSEFF<span class="brand-muted">.DEV</span></span></a>
+<nav class="main-nav" aria-label="Main navigation"><a href={base}>Home</a><a href={`${base}proyectos/`}>Projects</a><a href={`${base}contacto/`}>Contact</a></nav>
+<button class="command-trigger" type="button" id="command-trigger" aria-label="Open global search"><span>Search</span><kbd>Ctrl K</kbd></button>
 </header>
 <main><slot /></main>
-<footer class="site-footer"><div><span class="footer-mark">JL</span><span>Joseff Laverde <span class="brand-muted">· Tunja, Colombia</span></span></div><span class="footer-note">Construido con Astro, TypeScript y Tailwind CSS.</span><a href="mailto:joseffflaverde@gmail.com">Contacto ↗</a></footer>
+<footer class="site-footer"><div><span class="footer-mark">JL</span><span>Joseff Laverde <span class="brand-muted">· Tunja, Colombia</span></span></div><span class="footer-note">Built with Astro, TypeScript, and Tailwind CSS.</span><a href="mailto:joseffflaverde@gmail.com">Get in touch ↗</a></footer>
 </div>
 <div class="command-overlay" id="command-overlay" hidden>
-<button class="command-backdrop" type="button" data-close-search aria-label="Cerrar búsqueda"></button>
+<button class="command-backdrop" type="button" data-close-search aria-label="Close search"></button>
 <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
-<div class="command-heading"><span id="command-title">Búsqueda rápida</span><kbd>ESC</kbd></div>
-<input id="command-input" type="search" placeholder="Busca proyectos, tecnologías o secciones..." autocomplete="off" />
+<div class="command-heading"><span id="command-title">Quick search</span><kbd>ESC</kbd></div>
+<input id="command-input" type="search" placeholder="Search projects, technologies, or sections..." autocomplete="off" />
 <div class="command-results" id="command-results">
-<a href={base} data-search-item>Inicio — Perfil y presentación</a><a href={`${base}proyectos/`} data-search-item>Proyectos — Catálogo completo</a><a href={`${base}contacto/`} data-search-item>Contacto — Email y GitHub</a>
+<a href={base} data-search-item>Home — Profile and introduction</a><a href={`${base}proyectos/`} data-search-item>Projects — Complete project archive</a><a href={`${base}contacto/`} data-search-item>Contact — Email and GitHub</a>
 {projects.map((project) => <a href={`${base}proyectos/${project.slug}/`} data-search-item>{project.title} — {project.stack.join(' ')}</a>)}
-</div><p class="command-hint">Presiona Enter en un resultado o Esc para cerrar.</p>
+</div><p class="command-hint">Select a result or press Esc to close.</p>
 </section></div>
 <script>import '../scripts/portfolio';</script>
 </body></html>
