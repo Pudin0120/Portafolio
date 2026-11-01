@@ -1,0 +1,12 @@
+# Local database credentials
+db.local.properties
+
+# Eclipse / Java / Tomcat generated output
+.metadata/
+.settings/
+build/
+bin/
+target/
+*.class
+*.war
+*.ear
