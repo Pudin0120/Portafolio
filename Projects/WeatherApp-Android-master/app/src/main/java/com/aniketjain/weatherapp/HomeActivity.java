@@ -92,9 +92,11 @@ public class HomeActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_EXTRA_INPUT) {
             if (resultCode == RESULT_OK && data != null) {
-                ArrayList<String> arrayList = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                binding.layout.cityEt.setText(Objects.requireNonNull(arrayList).get(0).toUpperCase());
-                searchCity(binding.layout.cityEt.getText().toString());
+                ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                if (results != null && !results.isEmpty() && results.get(0) != null) {
+                    binding.layout.cityEt.setText(results.get(0));
+                    searchCity(results.get(0));
+                }
             }
         }
     }
@@ -147,8 +149,8 @@ public class HomeActivity extends AppCompatActivity {
         binding.layout.micSearchId.setOnClickListener(view -> {
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, Locale.getDefault());
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, REQUEST_CODE_EXTRA_INPUT);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag());
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak a city name");
             try {
                 //it was deprecated but still work
                 startActivityForResult(intent, REQUEST_CODE_EXTRA_INPUT);
@@ -329,8 +331,7 @@ public class HomeActivity extends AppCompatActivity {
                 Toaster.successToast(this, "Permission Granted");
                 getDataUsingNetwork();
             } else {
-                Toaster.errorToast(this, "Permission Denied");
-                finish();
+                Toaster.errorToast(this, "Location permission denied. You can still search for a city.");
             }
         }
     }
