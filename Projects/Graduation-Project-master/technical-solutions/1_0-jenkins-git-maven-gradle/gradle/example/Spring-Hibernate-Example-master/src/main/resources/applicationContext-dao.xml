@@ -7,8 +7,10 @@
         <property name="locations">
             <list>
                 <value>classpath:config.properties</value>
+                <value>file:config.local.properties</value>
             </list>
         </property>
+        <property name="ignoreResourceNotFound" value="true" />
     </bean>
 
     <!-- JDBC -->
