@@ -26,7 +26,7 @@
         <activity
             android:name="com.rh.activity.LoginActivity"
             android:label="@string/title_activity_login"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         </activity>
         <activity
             android:name="com.rh.activity.RegActivity"
