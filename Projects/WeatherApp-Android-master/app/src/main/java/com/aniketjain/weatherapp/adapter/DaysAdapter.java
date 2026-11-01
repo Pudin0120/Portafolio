@@ -64,13 +64,12 @@ public class DaysAdapter extends RecyclerView.Adapter<DaysAdapter.DayViewHolder>
             long sunrise = day.getLong("sunrise");
             long sunset = day.getLong("sunset");
             int condition = weather.getInt("id");
-            String description = weather.optString("main", "");
 
+            long forecastTime = day.optLong("dt", currentTime + (dayIndex * 86400L));
             Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(currentTime * 1000L);
-            calendar.add(Calendar.DAY_OF_YEAR, dayIndex);
+            calendar.setTimeInMillis(forecastTime * 1000L);
             String dayName = new SimpleDateFormat("EEEE", Locale.ENGLISH)
-                    .format(new Date(calendar.getTimeInMillis()));
+                    .format(new Date(forecastTime * 1000L));
 
             holder.dTime.setText(UpdateUI.TranslateDay(dayName, context));
             holder.temp_min.setText(Math.round(temperature.getDouble("min")) + " °C");
@@ -80,7 +79,7 @@ public class DaysAdapter extends RecyclerView.Adapter<DaysAdapter.DayViewHolder>
             holder.humidity.setText(day.optString("humidity", "--") + "%");
 
             int iconId = context.getResources().getIdentifier(
-                    UpdateUI.getIconID(condition, currentTime + (dayIndex * 86400L), sunrise, sunset),
+                    UpdateUI.getIconID(condition, forecastTime, sunrise, sunset),
                     "drawable",
                     context.getPackageName());
             if (iconId != 0) {
