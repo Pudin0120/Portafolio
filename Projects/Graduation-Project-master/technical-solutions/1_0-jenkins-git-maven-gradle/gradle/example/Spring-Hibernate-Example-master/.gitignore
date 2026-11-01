@@ -13,3 +13,9 @@ hs_err_pid*
 
 build/
 bin/
+
+# Local database credentials
+config.local.properties
+
+# Gradle and Java output
+.gradle/
