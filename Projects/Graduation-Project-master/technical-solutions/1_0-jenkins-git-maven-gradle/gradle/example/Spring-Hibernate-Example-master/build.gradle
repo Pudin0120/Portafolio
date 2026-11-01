@@ -8,8 +8,6 @@ version = '1.0'
 
 repositories {
     mavenLocal()
-    maven { url "http://10.100.120.245:8081/nexus/content/groups/public/" }
-    jcenter()
     mavenCentral()
 }
 
