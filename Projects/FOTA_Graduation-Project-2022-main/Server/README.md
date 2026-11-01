@@ -1,27 +1,42 @@
-# <p align="center">Server and Database Manager</p>
+# FOTA Server and Database Manager
 
-##  Overview
+This folder contains the server-side desktop component described by the project documentation. It provides a PyQt5 interface and integration with Firebase for firmware-update data and related information.
 
-- Used to abstract the backend implementations with <a href="https://firebase.google.com/" target="_blank">Firebase</a> and create standard interface to deal with the Firmware Updates.
-- GUI is implemented using Python via a library called <a href="https://doc.qt.io/" target="_blank">PyQt5</a>.
-- Any data whether it is file storage or real-time database is encrypted before being uploaded to Firebase using <a href="https://pycryptodome.readthedocs.io/en/latest/src/introduction.html" target="_blank">AES Encryption</a>.
+## Technologies documented
 
-##  Dependencies
+- Python 3.6 or newer in the original project notes
+- PyQt5 for the desktop UI
+- Pyrebase for Firebase integration
+- PyCryptodome for AES encryption
 
-Python 3.6 or higher version
+The original dependency notes list these packages but do not pin exact versions. Use a compatible Python environment and record a tested lock file before relying on reproducible installations.
 
-Please install the required packcages:
+## Setup
 
-```
-pyrebase
+Create and activate a virtual environment:
 
-pycryptodome
+    python -m venv .venv
 
-PyQt5
-```
+On Windows PowerShell:
 
-##  Screenshot of the GUI
+    .\.venv\Scripts\Activate.ps1
 
-<p align="center">
-<img width="700" src="/assets/Server/serverScreenshot.png">
-</p>
+On Linux or Raspberry Pi OS:
+
+    source .venv/bin/activate
+
+Install the documented dependencies:
+
+    python -m pip install PyQt5 pyrebase pycryptodome
+
+The repository snapshot does not expose a complete pinned requirements file or a verified application entry point for this folder. Inspect the Python files and Firebase initialization before selecting the command used to launch the GUI.
+
+## Security
+
+- Keep Firebase service-account credentials and private API keys outside Git.
+- Load encryption keys from a secure local configuration or a secrets manager.
+- Use authenticated encryption (for example, AES-GCM) for new data formats where compatibility permits; legacy encrypted records may require a controlled migration.
+- Add integrity/signature verification to firmware images and verify signatures on the device before flashing.
+- Avoid logging credentials, tokens, plaintext firmware, or sensitive user information.
+
+See the [root FOTA overview](../README.md) for the complete system architecture.
