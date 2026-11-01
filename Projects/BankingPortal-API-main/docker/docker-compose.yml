@@ -1,17 +1,15 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
     container_name: bankingportal-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: bankingapp
-      MYSQL_USER: bankinguser
-      MYSQL_PASSWORD: bankingpass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in the root .env file}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-bankingapp}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in the root .env file}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in the root .env file}
     ports:
-      - "3306:3306"
+      - "127.0.0.1:${MYSQL_HOST_PORT:-3306}:3306"
     volumes:
       - ./mysql/data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -24,7 +22,7 @@ services:
     container_name: bankingportal-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
     volumes:
       - ./redis/data:/data
     command: redis-server --appendonly yes
