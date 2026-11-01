@@ -63,6 +63,11 @@ jobs:
           cache-dependency-path: Projects/inventory-management-system-main/pom.xml
       - name: Compile and package
         run: mvn -B -f Projects/inventory-management-system-main/pom.xml -DskipTests package
+      - name: Verify password hashing
+        run: |
+          mkdir -p "$RUNNER_TEMP/inventory-test"
+          javac -d "$RUNNER_TEMP/inventory-test" Projects/inventory-management-system-main/src/main/java/com/inventorymanagementsystem/security/PasswordUtil.java Projects/inventory-management-system-main/tools/PasswordUtilSmokeTest.java
+          java -cp "$RUNNER_TEMP/inventory-test" com.inventorymanagementsystem.security.PasswordUtilSmokeTest
 
   train-reservation:
     name: Train reservation application (Java 8)
