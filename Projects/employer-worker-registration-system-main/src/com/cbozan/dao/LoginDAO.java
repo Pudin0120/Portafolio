@@ -17,22 +17,22 @@ public class LoginDAO {
             return false;
         }
 
-        Connection connection = DB.getConnection();
-        if (connection == null) {
-            return false;
-        }
+        try {
+            Connection connection = DB.getConnection();
+            try (PreparedStatement statement = connection.prepareStatement(VERIFY_LOGIN_SQL)) {
+                statement.setString(1, username.trim());
+                statement.setString(2, password);
 
-        try (PreparedStatement statement = connection.prepareStatement(VERIFY_LOGIN_SQL)) {
-            statement.setString(1, username.trim());
-            statement.setString(2, password);
-
-            try (ResultSet result = statement.executeQuery()) {
-                boolean authenticated = result.next();
-                DB.ERROR_MESSAGE = authenticated ? "" : "Invalid username or password.";
-                return authenticated;
+                try (ResultSet result = statement.executeQuery()) {
+                    boolean authenticated = result.next();
+                    DB.ERROR_MESSAGE = authenticated ? "" : "Invalid username or password.";
+                    return authenticated;
+                }
             }
         } catch (SQLException exception) {
-            DB.ERROR_MESSAGE = "Unable to verify the account. Check the database configuration.";
+            if (DB.ERROR_MESSAGE.isEmpty()) {
+                DB.ERROR_MESSAGE = "Unable to verify the account. Check the database configuration.";
+            }
             System.err.println(DB.ERROR_MESSAGE);
             return false;
         }
