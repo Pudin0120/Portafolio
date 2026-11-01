@@ -170,7 +170,6 @@ public class AdminController {
 		User user = this.userService.getUserByUsername(username);
 
 		if (user != null) {
-			model.addAttribute("userid", user.getId());
 			model.addAttribute("username", user.getUsername());
 			model.addAttribute("email", user.getEmail());
 			model.addAttribute("password", "");
@@ -182,10 +181,22 @@ public class AdminController {
 	}
 
 	@PostMapping("updateuser")
-	public String updateUserProfile(@RequestParam("userid") int userid, @RequestParam("username") String username,
+	public String updateUserProfile(@RequestParam("username") String username,
 			@RequestParam("email") String email, @RequestParam("password") String password,
 			@RequestParam("address") String address) {
-		User updatedUser = this.userService.updateUserProfile(userid, username, email, password, address);
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null || !authentication.isAuthenticated()
+				|| "anonymousUser".equals(authentication.getName())) {
+			return "redirect:/admin/login";
+		}
+
+		User currentUser = userService.getUserByUsername(authentication.getName());
+		if (currentUser == null) {
+			return "redirect:/admin/login";
+		}
+
+		User updatedUser = userService.updateUserProfile(
+				currentUser.getId(), username, email, password, address);
 		if (updatedUser != null) {
 			refreshAuthenticatedPrincipal(username);
 		}
@@ -196,7 +207,7 @@ public class AdminController {
 		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 		Authentication newAuthentication = new UsernamePasswordAuthenticationToken(
 				username,
-				currentAuthentication.getCredentials(),
+				null,
 				currentAuthentication.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(newAuthentication);
 	}
