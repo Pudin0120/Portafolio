@@ -22,6 +22,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ResourceBundle;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BillsController implements Initializable {
 
@@ -47,27 +49,51 @@ public class BillsController implements Initializable {
         bills_btn_close.getScene().getWindow().hide();
     }
 
-    public void searchAndPrintBillDetails(){
-        connection= Database.getInstance().connectDB();
-        String sql="SELECT * FROM `sales` s INNER JOIN customers c ON s.cust_id=c.id and s.inv_num='" +bills_search_invoice_number.getText() + "'";
-        try{
-            JasperDesign jasperDesign= JRXmlLoader.load(this.getClass().getClassLoader().getResourceAsStream("jasper-reports/Invoice.jrxml"));
-            JRDesignQuery updateQuery=new JRDesignQuery();
-            updateQuery.setText(sql);
-            jasperDesign.setQuery(updateQuery);
-            JasperReport jasperReport= JasperCompileManager.compileReport(jasperDesign);
-            JasperPrint jasperPrint= JasperFillManager.fillReport(jasperReport,null,connection);
-            JasperViewer.viewReport(jasperPrint ,false);
-        }catch (Exception err){
-            System.out.println(err.getMessage());
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setHeight(500);
-            alert.setTitle("Error Message");
-            alert.setHeaderText(null);
-            alert.setContentText(err.getMessage());
-            alert.showAndWait();
-            err.printStackTrace();
+    public void searchAndPrintBillDetails() {
+        String invoiceNumber = bills_search_invoice_number.getText() == null
+                ? ""
+                : bills_search_invoice_number.getText().trim();
+
+        if (invoiceNumber.isEmpty()) {
+            showInvoiceSearchError("Enter an invoice number before searching.");
+            return;
         }
+
+        try (Connection connection = Database.getInstance().connectDB()) {
+            if (connection == null) {
+                showInvoiceSearchError("The database connection is unavailable. Check the local database settings.");
+                return;
+            }
+
+            String sql = "SELECT * FROM sales s "
+                    + "INNER JOIN customers c ON s.cust_id = c.id "
+                    + "WHERE s.inv_num = $P{INVOICE_NUMBER}";
+
+            JasperDesign jasperDesign = JRXmlLoader.load(
+                    getClass().getClassLoader().getResourceAsStream("jasper-reports/Invoice.jrxml"));
+            JRDesignQuery query = new JRDesignQuery();
+            query.setText(sql);
+            jasperDesign.setQuery(query);
+
+            JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("INVOICE_NUMBER", invoiceNumber);
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(
+                    jasperReport, parameters, connection);
+            JasperViewer.viewReport(jasperPrint, false);
+        } catch (Exception exception) {
+            showInvoiceSearchError("Unable to generate the invoice report. Check the invoice number and database.");
+            exception.printStackTrace();
+        }
+    }
+
+    private void showInvoiceSearchError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Invoice report");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @Override
