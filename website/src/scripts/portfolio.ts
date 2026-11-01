@@ -48,16 +48,16 @@ function writeTerminalLine(content:string,className='response'):void{
  if(!terminalOutput)return;const line=document.createElement('p');line.className=className;line.textContent=content;terminalOutput.append(line);terminalOutput.scrollTop=terminalOutput.scrollHeight;
 }
 const commands:Record<string,string>={
- help:'Comandos: about · stack · projects · contact · clear',
- about:'Joseff Laverde | Desarrollador orientado a Backend y Full Stack | UPTC.',
+ help:'Commands: about · stack · projects · contact · clear',
+ about:'Joseff Laverde | Backend-focused Full Stack Developer | UPTC.',
  stack:'Backend: Java, Spring Boot, Python, FastAPI | Frontend: TypeScript, React, Next.js | Data: PostgreSQL, MySQL, Supabase | Tools: Docker, Git.',
- projects:'Destacados: Huffman Compressor Pro, Banking Portal API, Inventory Management System. Abre Proyectos para ver las fichas.',
+ projects:'Selected work: GERICARE, Huffman Compressor Pro, Banking Portal API, Inventory Management System. Open Projects to browse the full archive.',
  contact:'Email: joseffflaverde@gmail.com | GitHub: github.com/Pudin0120'
 };
 terminalForm?.addEventListener('submit',event=>{
  event.preventDefault();const command=terminalInput?.value.trim().toLowerCase()??'';if(!command)return;
  writeTerminalLine(`$ ${command}`,'terminal-command');
  if(command==='clear')terminalOutput?.replaceChildren();
- else writeTerminalLine(commands[command]??`Comando no reconocido: ${command}. Escribe help para ver las opciones.`);
+ else writeTerminalLine(commands[command]??`Unknown command: ${command}. Type help to see available options.`);
  if(terminalInput)terminalInput.value='';
 });
