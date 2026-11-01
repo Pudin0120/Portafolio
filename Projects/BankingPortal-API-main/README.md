@@ -104,8 +104,13 @@ The test sources use Spring Boot Test and MockMvc. Ensure the test-specific Spri
 - CORS now uses a comma-separated allow-list configured by APP_CORS_ALLOWED_ORIGINS; do not set it to a wildcard for credentialed production clients.
 - Only the Actuator health endpoint is intentionally public through the security filter chain. Keep other management endpoints protected.
 - Database, mail, geolocation, and JWT credentials must be provided through environment variables or a secrets manager.
+- OTP values are generated with SecureRandom, expire after five minutes, and are consumed after successful verification.
+- OTP generation lockouts are tracked per account in a local Caffeine cache. This is suitable only for a single application instance; use a shared Redis-backed limiter before running multiple instances.
+- Password-reset OTP requests return a generic response so callers cannot determine whether an email or account number is registered.
+- Internal server and external-service exception details are not returned to API clients.
 - The Docker Compose database and cache ports are bound to localhost for local development. Add authentication, TLS, private networking, backups, and monitored health checks before any non-local deployment.
 - The sample configuration is for local development. Review database schema/migration strategy, token lifecycle, rate limits, and audit logging before using the project with real financial data.
+- OTP records are still stored as plaintext in the database and should be stored as a keyed digest in a production deployment.
 
 ## License and attribution
 
