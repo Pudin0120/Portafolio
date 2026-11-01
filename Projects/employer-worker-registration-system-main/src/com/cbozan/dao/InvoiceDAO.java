@@ -67,7 +67,7 @@ public class InvoiceDAO {
 				} else {
 					
 					builder.setId(rs.getInt("id"));
-					builder.setJob_id(rs.getInt("employer_id"));
+					builder.setJob_id(rs.getInt("job_id"));
 					builder.setAmount(rs.getBigDecimal("amount"));
 					builder.setDate(rs.getTimestamp("date"));
 					
@@ -260,7 +260,7 @@ public class InvoiceDAO {
 			pst = conn.prepareStatement(query);
 			pst.setInt(1, invoice.getJob().getId());
 			pst.setBigDecimal(2, invoice.getAmount());
-			pst.setInt(5, invoice.getId());
+			pst.setInt(3, invoice.getId());
 			
 			result = pst.executeUpdate();
 			
