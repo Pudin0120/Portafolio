@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.jtspringproject.JtSpringProject.models.User;
 import com.jtspringproject.JtSpringProject.services.userService;
@@ -28,7 +29,7 @@ public class SecurityConfiguration {
 		SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
 			http.antMatcher("/admin/**")
 					.authorizeHttpRequests(requests -> requests
-							.requestMatchers("/admin/login").permitAll()
+							.requestMatchers(new AntPathRequestMatcher("/admin/login")).permitAll()
 							.requestMatchers("/admin/**").hasRole("ADMIN"))
 					.formLogin(login -> login
 							.loginPage("/admin/login")
