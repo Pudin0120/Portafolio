@@ -11,18 +11,28 @@
             http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd  
             http://www.springframework.org/schema/cache http://www.springframework.org/schema/jdbc/spring-cache.xsd">
 
+	<bean id="databaseProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:db.properties</value>
+				<value>file:db.local.properties</value>
+			</list>
+		</property>
+		<property name="ignoreResourceNotFound" value="true" />
+	</bean>
+
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
 		<property name="jdbcUrl">
-			<value>jdbc:mysql://localhost:3306/db_smart_home</value>
+			<value>${db.url}</value>
 		</property>
 		<property name="driverClass">
-			<value>com.mysql.jdbc.Driver</value>
+			<value>${db.driver}</value>
 		</property>
 		<property name="user">
-			<value>root</value>
+			<value>${db.username}</value>
 		</property>
 		<property name="password">
-			<value>123</value>
+			<value>${db.password}</value>
 		</property>
 	</bean>
 
@@ -49,8 +59,8 @@
 				<prop key="hibernate.dialect">
 					org.hibernate.dialect.MySQLDialect
 				</prop>
-				<prop key="hibernate.show_sql">true</prop>
-				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.format_sql">false</prop>
 			</props>
 		</property>
 	</bean>
