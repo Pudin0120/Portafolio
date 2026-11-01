@@ -1,59 +1,37 @@
---
-==================
+# SmartHome V1.1 — Struts / Spring / Hibernate Application
 
-##
+This topic contains the most complete server-side Java application in the Graduation Project archive: a legacy smart-home administration web application with JSP views, Struts actions, Spring services, and Hibernate entity mappings.
 
-    1ARMAndroid.
-    
-    2.
-    
-    3,
-    
-###
+## Source project
 
-    1
-    
-    2
-    
-###
+The application is located at:
 
-    1androidapp + app
-    
-    2MVC + ) + SSH / Django
-    
-    3(WebSocket + WebRTC + Webservice)
-    
-    4JPUSH
-    
-    5ARMWIFI
-    
-    6git + jenkins ( maven / Gradle)
+`Code/SmartHomeV1.1(struts2+spring3+hibernate3)/SmartHome/`
 
-###
-    
-    1
-    
-    2
-    
-    3
-    
-    4
-    
-    5
-    
-###
-![image](https://raw.githubusercontent.com/JamesonHuang/Graduation-Project/master/%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85%E5%8E%9F%E5%9E%8B%E5%9B%BE.jpg)
+Read the [SmartHome application guide](Code/SmartHomeV1.1(struts2+spring3+hibernate3)/SmartHome/README.md) before attempting to open or run it.
 
-###
+## Architecture visible in the source
 
-[ARMAndroid.pdf](https://github.com/JamesonHuang/Graduation-Project/blob/master/%E7%9B%B8%E5%85%B3%E8%AE%BA%E6%96%87/%E5%9F%BA%E4%BA%8EARM%E4%B8%8EAndroid%E7%9A%84%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0.pdf)
-    
-[Webservice.pdf](https://github.com/JamesonHuang/Graduation-Project/blob/master/%E7%9B%B8%E5%85%B3%E8%AE%BA%E6%96%87/201301-220.pdf)
-    
-[Android_.caj](https://github.com/JamesonHuang/Graduation-Project/blob/master/%E7%9B%B8%E5%85%B3%E8%AE%BA%E6%96%87/%EF%BC%81%E5%9F%BA%E4%BA%8EAndroid%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BE%BF%E6%90%BA%E5%BC%8F%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85%E6%8E%A7%E5%88%B6%E7%BB%88%E7%AB%AF%E6%8A%80%E6%9C%AF%E7%A0%94%E7%A9%B6_%E5%BA%94%E5%B1%B1.caj)
-    
-[Android_.caj](https://github.com/JamesonHuang/Graduation-Project/blob/master/%E7%9B%B8%E5%85%B3%E8%AE%BA%E6%96%87/%E5%9F%BA%E4%BA%8EAndroid%E7%9A%84%E7%A7%BB%E5%8A%A8%E8%A7%86%E9%A2%91%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0_%E4%BD%99%E8%8D%A3%E5%8F%91.caj)
-    
-[Android_.caj](https://github.com/JamesonHuang/Graduation-Project/blob/master/%E7%9B%B8%E5%85%B3%E8%AE%BA%E6%96%87/%E5%9F%BA%E4%BA%8EAndroid%E7%9A%84%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0_%E9%B9%BF%E6%9B%BC.caj)
-    
-[Android_.caj](https://github.com/JamesonHuang/Graduation-Project/blob/master/%E7%9B%B8%E5%85%B3%E8%AE%BA%E6%96%87/%E5%9F%BA%E4%BA%8EAndroid%E7%9A%84%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%A0%94%E7%A9%B6%E4%B8%8E%E5%AE%9E%E7%8E%B0_%E7%8E%8B%E6%9C%9D%E5%8D%8E.caj)
+- **Presentation:** JSP CRUD screens under `WebRoot/`.
+- **Routing:** Struts 2 action mappings in `src/struts.xml`, registered by the Servlet filter in `WebRoot/WEB-INF/web.xml`.
+- **Actions:** `src/com/rh/ssh/action/`.
+- **Services:** `src/com/rh/ssh/service/` and implementation classes.
+- **Persistence:** Hibernate 3 XML mappings under `src/com/rh/ssh/model/`.
+- **Dependency wiring:** `src/spring-dao.xml`, `spring-service.xml`, and `spring-action.xml`.
+
+The entities cover devices, users, projects, tasks, messages, background information, and related types/details.
+
+## Toolchain and build limitation
+
+The Eclipse project metadata references Tomcat 8.0, the web descriptor uses Servlet 2.4, and the Spring DAO layer uses Hibernate 3. There is no Maven POM, Gradle build file, or wrapper in the source project, and the Eclipse classpath relies on a locally installed server/runtime.
+
+This is a legacy prototype, not a currently supported production application. Use an isolated legacy development environment and plan a staged migration before exposing it to a network.
+
+## Security changes in this review
+
+- Removed the hard-coded MySQL root credentials from Spring DAO XML.
+- Added tracked, credential-free DB defaults and ignored local DB overrides.
+- Disabled Hibernate SQL logging by default.
+- Disabled Struts development mode by default.
+
+Dynamic Method Invocation remains enabled pending review of every JSP action URL. Do not treat this as a production security certification.
