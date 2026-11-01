@@ -1,9 +1,17 @@
 package com.aniketjain.weatherapp.location;
 
-public class LocationCord {
+import com.aniketjain.weatherapp.BuildConfig;
+
+public final class LocationCord {
+
     public static String lat = "";
     public static String lon = "";
-        public final static String API_KEY = "0bc14881636d2234e8c17736a470535f";
-//    public final static String API_KEY = "eeb8b40367eee691683e5a079e2fa695";
-}
 
+    private LocationCord() {
+    }
+
+    public static boolean hasApiKey() {
+        return BuildConfig.WEATHER_API_KEY != null
+                && !BuildConfig.WEATHER_API_KEY.trim().isEmpty();
+    }
+}
