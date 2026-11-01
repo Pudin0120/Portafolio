@@ -30,7 +30,7 @@ public class SecurityConfiguration {
 			http.antMatcher("/admin/**")
 					.authorizeHttpRequests(requests -> requests
 							.requestMatchers(new AntPathRequestMatcher("/admin/login")).permitAll()
-							.requestMatchers("/admin/**").hasRole("ADMIN"))
+							.requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN"))
 					.formLogin(login -> login
 							.loginPage("/admin/login")
 							.loginProcessingUrl("/admin/loginvalidate")
