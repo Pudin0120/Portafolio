@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JsonProcessingException.class)
     public ResponseEntity<String> handleJsonProcessingException(JsonProcessingException ex) {
-        return ResponseEntity.internalServerError().body("An external service is temporarily unavailable.");
+        return ResponseEntity.internalServerError().body("Unable to process the request payload.");
     }
 
     @ExceptionHandler(NotFoundException.class)
@@ -101,7 +101,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PasswordResetException.class)
     public ResponseEntity<String> handlePasswordResetException(PasswordResetException ex, WebRequest request) {
         return ResponseEntity.internalServerError()
-                .body("{\\"message\\": \\"The password reset could not be completed.\\"}");
+                .body("The password reset could not be completed.");
     }
 
     @ExceptionHandler(RestClientException.class)
@@ -125,9 +125,105 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGlobalException(Exception ex, WebRequest request) {
+undefined}");
+    }
+}}");
+    }
+}    public ResponseEntity<String> handleGlobalException(Exception ex, WebRequest request) {
+        return ResponseEntity.internalServerError().body("An unexpected error occurred.");
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<String> handleBadCredentialsException(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FundTransferException.class)
+    public ResponseEntity<String> handleFundTransferException(FundTransferException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(GeolocationException.class)
+    public ResponseEntity<String> handleGeolocationException(GeolocationException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(
+            IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<String> handleInsufficientBalanceException(
+            InsufficientBalanceException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidAmountException.class)
+    public ResponseEntity<String> handleInvalidAmountException(InvalidAmountException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity<String> handleInvalidOtpException(InvalidOtpException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidPinException.class)
+    public ResponseEntity<String> handleInvalidPinException(InvalidPinException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<String> handleInvalidTokenException(InvalidTokenException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(JsonProcessingException.class)
+    public ResponseEntity<String> handleJsonProcessingException(JsonProcessingException ex) {
+        return ResponseEntity.internalServerError().body("Unable to process the request payload.");
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OtpRetryLimitExceededException.class)
+    public ResponseEntity<String> handleOtpRetryLimitExceededException(
+            OtpRetryLimitExceededException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(PasswordResetException.class)
+    public ResponseEntity<String> handlePasswordResetException(PasswordResetException ex, WebRequest request) {
         return ResponseEntity.internalServerError()
-                .body("{\\"message\\": \\"An unexpected error occurred.\\"}");
+                .body("The password reset could not be completed.");
+    }
+
+    @ExceptionHandler(RestClientException.class)
+    public ResponseEntity<String> handleRestClientException(RestClientException ex) {
+        return ResponseEntity.internalServerError().body("An external service is temporarily unavailable.");
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UserInvalidException.class)
+    public ResponseEntity<String> handleUserInvalidException(UserInvalidException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(RedisConnectionFailureException.class)
+    public ResponseEntity<Map<String, String>> handleRedisConnectionFailure(RedisConnectionFailureException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("message", ApiMessages.REDIS_CONNECTION_FAILURE.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+undefined}");
     }
 }}");
     }
