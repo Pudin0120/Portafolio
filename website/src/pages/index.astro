@@ -2,33 +2,47 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { projects } from '../data/projects';
 const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+const featuredSlugs = ['gericare', 'huffman-compressor-pro', 'banking-portal-api', 'inventory-management-system'];
+const featuredProjects = featuredSlugs.map((slug) => projects.find((project) => project.slug === slug)!).filter(Boolean);
+const gericare = featuredProjects[0];
+const supportingProjects = featuredProjects.slice(1);
 ---
 <BaseLayout>
 <section class="hero section-wrap">
 <div class="hero-copy">
 <p class="eyebrow"><span class="status-dot"></span> SOFTWARE ENGINEERING · TUNJA, COLOMBIA</p>
-<h1>Construyo software con <span class="text-gradient">propósito y criterio técnico.</span></h1>
-<p class="hero-lead">Soy <strong>Joseff Laverde</strong>, desarrollador orientado a Backend y Full Stack. Trabajo en aplicaciones, APIs, bases de datos e interfaces para convertir ideas en soluciones claras y mantenibles.</p>
-<div class="hero-actions"><a class="button button-primary" href={`${base}proyectos/`}>Explorar proyectos ↗</a><a class="button button-secondary" href="mailto:joseffflaverde@gmail.com">Contactarme</a></div>
-<div class="hero-meta"><span><span class="meta-icon">⌘</span> Java · Python · TypeScript</span><span><span class="meta-icon">⌖</span> UPTC · Ingeniería de Sistemas</span></div>
+<h1>Building software with <span class="text-gradient">purpose and engineering discipline.</span></h1>
+<p class="hero-lead">I’m <strong>Joseff Laverde</strong>, a Backend-focused Full Stack Developer and Systems & Computing Engineering student. I build applications, APIs, data-driven systems, and maintainable software.</p>
+<div class="hero-actions"><a class="button button-primary" href="#selected-work">Explore selected work ↗</a><a class="button button-secondary" href={`${base}contacto/`}>Get in touch</a></div>
+<div class="hero-meta"><span><span class="meta-icon">⌘</span> Java · Python · TypeScript</span><span><span class="meta-icon">⌖</span> UPTC · Systems & Computing Engineering</span></div>
 </div>
-<div class="terminal-card" aria-label="Terminal interactiva">
+<div class="terminal-card" aria-label="Interactive terminal">
 <div class="terminal-top"><div class="terminal-lights"><i></i><i></i><i></i></div><span>joseff@portfolio: ~</span><span class="terminal-live">LIVE</span></div>
-<div class="terminal-body"><div class="terminal-intro"><span class="terminal-symbol">┌──(</span><strong>joseff㉿portfolio</strong><span class="terminal-symbol">)-[~]</span><p>Bienvenido. Escribe <code>help</code> para ver los comandos.</p></div>
-<div class="terminal-output" id="terminal-output" aria-live="polite"><p><span class="terminal-muted">system</span> Portafolio cargado correctamente.</p><p><span class="terminal-muted">tip</span> Prueba <code>about</code>, <code>stack</code> o <code>projects</code>.</p></div>
-<form class="terminal-form" id="terminal-form"><label for="terminal-input"><span>$</span></label><input id="terminal-input" name="command" type="text" placeholder="escribe un comando..." autocomplete="off" spellcheck="false" /><span class="terminal-cursor" aria-hidden="true"></span></form>
+<div class="terminal-body"><div class="terminal-intro"><span class="terminal-symbol">┌──(</span><strong>joseff㉿portfolio</strong><span class="terminal-symbol">)-[~]</span><p>Welcome. Type <code>help</code> to see available commands.</p></div>
+<div class="terminal-output" id="terminal-output" aria-live="polite"><p><span class="terminal-muted">system</span> Portfolio loaded successfully.</p><p><span class="terminal-muted">tip</span> Try <code>about</code>, <code>stack</code>, or <code>projects</code>.</p></div>
+<form class="terminal-form" id="terminal-form"><label for="terminal-input"><span>$</span></label><input id="terminal-input" name="command" type="text" placeholder="type a command..." autocomplete="off" spellcheck="false" /><span class="terminal-cursor" aria-hidden="true"></span></form>
 </div></div></section>
+
 <section class="section-wrap bento-section">
-<div class="section-heading"><div><p class="eyebrow">01 / PERFIL TÉCNICO</p><h2>Ingeniería enfocada en construir.</h2></div><p>Una combinación de fundamentos, desarrollo de aplicaciones y herramientas actuales.</p></div>
+<div class="section-heading"><div><p class="eyebrow">01 / ENGINEERING PROFILE</p><h2>Good engineering starts with clear thinking.</h2></div><p>Software fundamentals, application development, and tools chosen to solve practical problems.</p></div>
 <div class="bento-grid">
-<article class="bento-card bento-main"><span class="card-index">01 — BACKEND</span><div><div class="bento-icon">⌘</div><h3>Lógica y arquitectura</h3><p>Servicios, APIs REST, validación de datos y separación de responsabilidades.</p></div><div class="tag-row"><span>Java</span><span>Spring Boot</span><span>Python</span><span>FastAPI</span></div></article>
-<article class="bento-card bento-front"><span class="card-index">02 — FRONTEND</span><div><div class="bento-icon">◈</div><h3>Interfaces funcionales</h3><p>Experiencias web responsive con componentes claros y tipado.</p></div><div class="tag-row"><span>TypeScript</span><span>React</span><span>Next.js</span></div></article>
-<article class="bento-card bento-data"><span class="card-index">03 — DATA</span><div><div class="bento-icon">⌁</div><h3>Persistencia y datos</h3><p>Modelado relacional, consultas SQL e integración de datos.</p></div><div class="tag-row"><span>PostgreSQL</span><span>MySQL</span><span>Supabase</span></div></article>
-<article class="bento-card bento-tools"><span class="card-index">04 — TOOLING</span><div><div class="bento-icon">⟡</div><h3>Entorno de desarrollo</h3><p>Control de versiones, contenedores y automatización de flujos.</p></div><div class="tag-row"><span>Git</span><span>Docker</span><span>Linux</span><span>GitHub Actions</span></div></article>
+<article class="bento-card bento-main"><span class="card-index">01 — BACKEND</span><div><div class="bento-icon">⌘</div><h3>Logic & architecture</h3><p>Services, REST APIs, data validation, and separation of concerns.</p></div><div class="tag-row"><span>Java</span><span>Spring Boot</span><span>Python</span><span>FastAPI</span></div></article>
+<article class="bento-card bento-front"><span class="card-index">02 — FRONTEND</span><div><div class="bento-icon">◈</div><h3>Functional interfaces</h3><p>Responsive web experiences built with clear components and typed code.</p></div><div class="tag-row"><span>TypeScript</span><span>React</span><span>Next.js</span></div></article>
+<article class="bento-card bento-data"><span class="card-index">03 — DATA</span><div><div class="bento-icon">⌁</div><h3>Data & persistence</h3><p>Relational modeling, SQL queries, and data integration.</p></div><div class="tag-row"><span>PostgreSQL</span><span>MySQL</span><span>Supabase</span></div></article>
+<article class="bento-card bento-tools"><span class="card-index">04 — TOOLING</span><div><div class="bento-icon">⟡</div><h3>Development workflow</h3><p>Version control, containers, and delivery automation.</p></div><div class="tag-row"><span>Git</span><span>Docker</span><span>Linux</span><span>GitHub Actions</span></div></article>
 </div></section>
-<section class="section-wrap featured-section">
-<div class="section-heading"><div><p class="eyebrow">02 / CATÁLOGO COMPLETO</p><h2>Todos mis proyectos, en un solo lugar.</h2></div><a class="text-link" href={`${base}proyectos/`}>Explorar catálogo y filtros ↗</a></div>
-<p class="catalog-note">Catálogo completo: {projects.length} fichas entre proyectos destacados y los {projects.length - 4} directorios del repositorio, incluidos juegos, algoritmos, aplicaciones, proyectos de salud y sistemas de gestión.</p><div class="featured-list">{projects.map((project,index)=><a class="featured-project" href={`${base}proyectos/${project.slug}/`}><span class="project-number">0{index+1}</span><div class="featured-project-copy"><span class="project-category">{project.categoryLabel} · {project.classification}</span><h3>{project.title}</h3><p>{project.summary}</p><div class="tag-row">{project.stack.slice(0,5).map((item)=><span>{item}</span>)}</div></div><span class="project-arrow" aria-hidden="true">↗</span></a>)}</div>
+
+<section class="section-wrap featured-section" id="selected-work">
+<div class="section-heading"><div><p class="eyebrow">02 / SELECTED WORK</p><h2>A focused selection of engineering projects.</h2></div><p>Rather than listing everything here, this selection highlights projects with the strongest technical or product scope.</p></div>
+<article class="spotlight-project">
+<div class="spotlight-top"><span class="spotlight-label">FEATURED HEALTHCARE PLATFORM</span><span class="spotlight-number">01 / 04</span></div>
+<div class="spotlight-body"><div class="spotlight-copy"><h3>{gericare.title}</h3><p class="spotlight-summary">{gericare.summary}</p><p class="spotlight-description">A healthcare-focused product concept centered on geriatric workflows, electronic clinical records, comprehensive assessment, and multi-tenant data architecture.</p><div class="tag-row">{gericare.stack.map((item)=><span>{item}</span>)}</div><div class="spotlight-actions"><a class="button button-primary" href={`${base}proyectos/${gericare.slug}/`}>View project profile ↗</a><a class="text-link" href={gericare.repository} target="_blank" rel="noreferrer">Find repository ↗</a></div></div><div class="spotlight-aside"><span class="aside-kicker">PROJECT FOCUS</span><strong>Geriatric care</strong><span>Clinical workflows</span><span>Electronic records</span><span>Multi-tenant architecture</span><p>Project profile based on the available project description. Its code is not currently stored as a standalone folder in this repository.</p></div></div>
+</article>
+<div class="selected-project-grid">
+{supportingProjects.map((project,index)=><article class="selected-project-card"><div class="selected-card-top"><span>{project.categoryLabel}</span><span>0{index+2} / 04</span></div><h3>{project.title}</h3><p>{project.summary}</p><div class="tag-row">{project.stack.slice(0,5).map((item)=><span>{item}</span>)}</div><a class="text-link" href={`${base}proyectos/${project.slug}/`}>Explore project ↗</a></article>)}
+</div>
+<div class="archive-cta"><div><p class="eyebrow">THE COMPLETE ARCHIVE</p><h3>Looking for something else?</h3><p>Browse all {projects.length} project entries, including academic exercises, applications, games, algorithms, and healthcare systems.</p></div><a class="button button-secondary" href={`${base}proyectos/`}>Browse all projects ↗</a></div>
 </section>
-<section class="section-wrap closing-panel"><div><p class="eyebrow">03 / SIGUIENTE PASO</p><h2>¿Hablamos de software?</h2><p>Estoy abierto a conversar sobre oportunidades, colaboración y proyectos de desarrollo.</p></div><a class="button button-primary" href="mailto:joseffflaverde@gmail.com">Escríbeme ↗</a></section>
+
+<section class="section-wrap closing-panel"><div><p class="eyebrow">03 / LET’S CONNECT</p><h2>Have a software challenge in mind?</h2><p>I’m open to professional opportunities, technical collaboration, and conversations about software development.</p></div><a class="button button-primary" href={`${base}contacto/`}>Contact me ↗</a></section>
 </BaseLayout>
