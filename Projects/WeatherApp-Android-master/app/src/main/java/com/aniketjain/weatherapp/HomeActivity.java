@@ -242,11 +242,11 @@ public class HomeActivity extends AppCompatActivity {
                 sunset = response.getJSONArray("daily").getJSONObject(0).getLong("sunset");
                 description = response.getJSONObject("current").getJSONArray("weather").getJSONObject(0).getString("main");
 
-                temperature = String.valueOf(Math.round(response.getJSONObject("current").getDouble("temp") - 273.15));
-                min_temperature = String.format("%.0f", response.getJSONArray("daily").getJSONObject(0).getJSONObject("temp").getDouble("min") - 273.15);
-                max_temperature = String.format("%.0f", response.getJSONArray("daily").getJSONObject(0).getJSONObject("temp").getDouble("max") - 273.15);
+                temperature = String.valueOf(Math.round(response.getJSONObject("current").getDouble("temp")));
+                min_temperature = String.format("%.0f", response.getJSONArray("daily").getJSONObject(0).getJSONObject("temp").getDouble("min"));
+                max_temperature = String.format("%.0f", response.getJSONArray("daily").getJSONObject(0).getJSONObject("temp").getDouble("max"));
                 pressure = response.getJSONArray("daily").getJSONObject(0).getString("pressure");
-                wind_speed = response.getJSONArray("daily").getJSONObject(0).getString("wind_speed");
+                wind_speed = String.valueOf(response.getJSONArray("daily").getJSONObject(0).getDouble("wind_speed") * 3.6);
                 humidity = response.getJSONArray("daily").getJSONObject(0).getString("humidity");
 
                 updateUI();
@@ -278,7 +278,7 @@ public class HomeActivity extends AppCompatActivity {
                         getPackageName()
                 ));
         binding.layout.conditionDescTv.setText(description);
-        binding.layout.tempTv.setText(temperature + " degC");
+        binding.layout.tempTv.setText(temperature + " °C");
         binding.layout.minTempTv.setText(min_temperature + " degC");
         binding.layout.maxTempTv.setText(max_temperature + " degC");
         binding.layout.pressureTv.setText(pressure + " mb");
