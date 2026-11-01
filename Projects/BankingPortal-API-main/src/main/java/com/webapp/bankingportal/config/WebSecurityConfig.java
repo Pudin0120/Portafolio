@@ -2,9 +2,9 @@ package com.webapp.bankingportal.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -21,7 +21,6 @@ import com.webapp.bankingportal.security.JwtAuthenticationFilter;
 import com.webapp.bankingportal.service.TokenService;
 
 import jakarta.servlet.http.HttpServletResponse;
-
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -38,10 +37,10 @@ public class WebSecurityConfig {
             "/api/auth/password-reset",
             "/api/users/generate-otp",
             "/api/users/verify-otp",
-            "swagger-ui.html",
+            "/swagger-ui.html",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/actuator/**"
+            "/actuator/health"
     };
 
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -67,18 +66,17 @@ public class WebSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
-                .exceptionHandling(handling -> {
-                    handling.authenticationEntryPoint(jwtAuthenticationEntryPoint);
-                })
-                .sessionManagement(management -> {
-                    management.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                })
-
+                .exceptionHandling(handling ->
+                        handling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .sessionManagement(management ->
+                        management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .logout(logout -> logout
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
@@ -89,5 +87,4 @@ public class WebSecurityConfig {
 
         return http.build();
     }
-
 }
