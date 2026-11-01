@@ -81,7 +81,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '8'
-      - name: Compile reviewed standalone utilities
+      - name: Compile reviewed JavaCodes utilities and password demo
         run: |
           mkdir -p "$RUNNER_TEMP/javac-out"
-          javac -d "$RUNNER_TEMP/javac-out" Projects/JavaCodes/OpenWeatherMap.java "Projects/JavaCodes/Host-checker.java"
+          javac -d "$RUNNER_TEMP/javac-out" Projects/JavaCodes/OpenWeatherMap.java "Projects/JavaCodes/Host-checker.java" "Projects/JavaCodes/passowrd&notes.java" Projects/JavaCodes/CryptoUtilSmokeTest.java
+          java -cp "$RUNNER_TEMP/javac-out" CryptoUtilSmokeTest
