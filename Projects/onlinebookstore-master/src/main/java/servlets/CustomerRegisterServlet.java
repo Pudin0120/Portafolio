@@ -16,43 +16,61 @@ import com.bittercode.model.User;
 import com.bittercode.model.UserRole;
 import com.bittercode.service.UserService;
 import com.bittercode.service.impl.UserServiceImpl;
+import com.bittercode.util.StoreUtil;
 
 public class CustomerRegisterServlet extends HttpServlet {
 
-    UserService userService = new UserServiceImpl();
+    private final UserService userService = new UserServiceImpl();
 
-    public void service(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-        PrintWriter pw = res.getWriter();
-        res.setContentType(BookStoreConstants.CONTENT_TYPE_TEXT_HTML);
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType(BookStoreConstants.CONTENT_TYPE_TEXT_HTML + "; charset=UTF-8");
+        PrintWriter writer = response.getWriter();
 
-        String pWord = req.getParameter(UsersDBConstants.COLUMN_PASSWORD);
-        String fName = req.getParameter(UsersDBConstants.COLUMN_FIRSTNAME);
-        String lName = req.getParameter(UsersDBConstants.COLUMN_LASTNAME);
-        String addr = req.getParameter(UsersDBConstants.COLUMN_ADDRESS);
-        String phNo = req.getParameter(UsersDBConstants.COLUMN_PHONE);
-        String mailId = req.getParameter(UsersDBConstants.COLUMN_MAILID);
-        User user = new User();
-        user.setEmailId(mailId);
-        user.setFirstName(fName);
-        user.setLastName(lName);
-        user.setPassword(pWord);
-        user.setPhone(Long.parseLong(phNo));
-        user.setAddress(addr);
-        try {
-            String respCode = userService.register(UserRole.CUSTOMER, user);
-            System.out.println(respCode);
-            if (ResponseCode.SUCCESS.name().equalsIgnoreCase(respCode)) {
-                RequestDispatcher rd = req.getRequestDispatcher("CustomerLogin.html");
-                rd.include(req, res);
-                pw.println("<table class=\"tab\"><tr><td>User Registered Successfully</td></tr></table>");
-            } else {
-                RequestDispatcher rd = req.getRequestDispatcher("CustomerRegister.html");
-                rd.include(req, res);
-                pw.println("<table class=\"tab\"><tr><td>" + respCode + "</td></tr></table>");
-                pw.println("Sorry for interruption! Try again");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        String password = request.getParameter(UsersDBConstants.COLUMN_PASSWORD);
+        String firstName = request.getParameter(UsersDBConstants.COLUMN_FIRSTNAME);
+        String lastName = request.getParameter(UsersDBConstants.COLUMN_LASTNAME);
+        String address = request.getParameter(UsersDBConstants.COLUMN_ADDRESS);
+        String phoneValue = request.getParameter(UsersDBConstants.COLUMN_PHONE);
+        String email = request.getParameter(UsersDBConstants.COLUMN_MAILID);
+
+        if (phoneValue == null || !phoneValue.matches("\\d{7,15}")) {
+            showRegistrationError(request, response, writer, "Enter a valid phone number.");
+            return;
         }
+
+        User user = new User();
+        user.setEmailId(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setPassword(password);
+        user.setAddress(address);
+        try {
+            user.setPhone(Long.parseLong(phoneValue));
+            String result = userService.register(UserRole.CUSTOMER, user);
+            if (ResponseCode.SUCCESS.name().equalsIgnoreCase(result)) {
+                RequestDispatcher dispatcher = request.getRequestDispatcher("CustomerLogin.html");
+                dispatcher.include(request, response);
+                writer.println("<table class=\"tab\"><tr><td>Account registered successfully.</td></tr></table>");
+            } else {
+                showRegistrationError(request, response, writer, result);
+            }
+        } catch (NumberFormatException exception) {
+            showRegistrationError(request, response, writer, "Enter a valid phone number.");
+        }
+    }
+
+    private void showRegistrationError(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            PrintWriter writer,
+            String message) throws ServletException, IOException {
+        RequestDispatcher dispatcher = request.getRequestDispatcher("CustomerRegister.html");
+        dispatcher.include(request, response);
+        writer.println("<table class=\"tab\"><tr><td>"
+                + StoreUtil.escapeHtml(message)
+                + "</td></tr></table>");
     }
 }
