@@ -83,8 +83,6 @@ public class HomeActivity extends AppCompatActivity {
         // when user do search and refresh
         listeners();
 
-        // getting data using internet connection
-        getDataUsingNetwork();
 
     }
 
@@ -108,8 +106,8 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void setUpDaysRecyclerView() {
-        DaysAdapter daysAdapter = new DaysAdapter(this);
+    private void setUpDaysRecyclerView(org.json.JSONArray dailyForecast, long currentTime) {
+        DaysAdapter daysAdapter = new DaysAdapter(this, dailyForecast, currentTime);
         binding.dayRv.setLayoutManager(
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         );
@@ -170,7 +168,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void searchCity(String cityName) {
-        if (cityName == null || cityName.isEmpty()) {
+        if (cityName == null || cityName.trim().isEmpty()) {
             Toaster.errorToast(this, "Please enter the city name");
         } else {
             setLatitudeLongitudeUsingCity(cityName);
@@ -178,6 +176,11 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void getDataUsingNetwork() {
+        if (!LocationCord.hasApiKey()) {
+            hideProgressBar();
+            Toaster.errorToast(this, "Configure WEATHER_API_KEY in local Gradle properties or the environment.");
+            return;
+        }
         FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
         //check permission
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
@@ -185,17 +188,27 @@ public class HomeActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_CODE);
         } else {
             client.getLastLocation().addOnSuccessListener(location -> {
-                setLongitudeLatitude(location);
+                if (!setLongitudeLatitude(location)) {
+                    hideProgressBar();
+                    Toaster.errorToast(this, "Location is unavailable. Search for a city instead.");
+                    return;
+                }
                 city = getCityNameUsingNetwork(this, location);
-                getTodayWeatherInfo(city);
+                getTodayWeatherInfo(city == null || city.trim().isEmpty() ? "Your location" : city);
+            }).addOnFailureListener(error -> {
+                hideProgressBar();
+                Toaster.errorToast(this, "Unable to read your location. Search for a city instead.");
             });
         }
     }
 
     private void setLatitudeLongitudeUsingCity(String cityName) {
-        URL.setCity_url(cityName);
+        if (!LocationCord.hasApiKey()) {
+            Toaster.errorToast(this, "Weather service is not configured.");
+            return;
+        }
         RequestQueue requestQueue = Volley.newRequestQueue(HomeActivity.this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, URL.getCity_url(), null, response -> {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, URL.getCityUrl(cityName), null, response -> {
             try {
                 LocationCord.lat = response.getJSONObject("coord").getString("lat");
                 LocationCord.lon = response.getJSONObject("coord").getString("lon");
@@ -211,6 +224,11 @@ public class HomeActivity extends AppCompatActivity {
 
     @SuppressLint("DefaultLocale")
     private void getTodayWeatherInfo(String name) {
+        if (!LocationCord.hasApiKey()) {
+            hideProgressBar();
+            Toaster.errorToast(this, "Weather service is not configured.");
+            return;
+        }
         URL url = new URL();
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url.getLink(), null, response -> {
@@ -233,13 +251,19 @@ public class HomeActivity extends AppCompatActivity {
 
                 updateUI();
                 hideProgressBar();
-                setUpDaysRecyclerView();
+                setUpDaysRecyclerView(response.getJSONArray("daily"), update_time);
             } catch (JSONException e) {
-                e.printStackTrace();
+                hideProgressBar();
+                Toaster.errorToast(this, "Weather data could not be read.");
+                Log.e("weather", "Invalid weather response.", e);
             }
-        }, null);
+        }, error -> {
+            hideProgressBar();
+            Toaster.errorToast(this, "Unable to load weather data. Please try again.");
+            Log.e("weather", "Weather request failed.", error);
+        });
         requestQueue.add(jsonObjectRequest);
-        Log.i("json_req", "Day 0");
+        Log.i("weather", "Forecast request submitted.");
     }
 
     @SuppressLint("SetTextI18n")
@@ -297,7 +321,11 @@ public class HomeActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            boolean granted = false;
+            for (int result : grantResults) {
+                granted = granted || result == PackageManager.PERMISSION_GRANTED;
+            }
+            if (granted) {
                 Toaster.successToast(this, "Permission Granted");
                 getDataUsingNetwork();
             } else {
