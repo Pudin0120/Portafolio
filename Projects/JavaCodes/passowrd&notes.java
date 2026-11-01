@@ -259,9 +259,9 @@ class CryptoUtil {
 
         byte[] salt = new byte[SALT_LENGTH];
         byte[] nonce = new byte[NONCE_LENGTH];
-        byte[] encrypted = new byte[buffer.remaining() - NONCE_LENGTH];
         buffer.get(salt);
         buffer.get(nonce);
+        byte[] encrypted = new byte[buffer.remaining()];
         buffer.get(encrypted);
 
         byte[] keyBytes = deriveKey(secretKey, salt);
