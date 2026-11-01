@@ -91,7 +91,7 @@ public class WorkerDAO {
 					list.add(worker);
 					cache.put(worker.getId(), worker);
 				} catch (EntityException e) {
-					showEntityException(e, rs.getString("fname") + " " + rs.getShort("lname"));
+					showEntityException(e, rs.getString("fname") + " " + rs.getString("lname"));
 				}
 				
 			}
