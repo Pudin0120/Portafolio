@@ -1,60 +1,80 @@
-# MIMS-master
+# MIMS — Medical Inventory Management System
 
-## Description
-Project MIMS-master: application built with C#, JavaScript/TypeScript, HTML/CSS. This folder contains the source code and resources needed to review, run, and adapt the solution as part of the portfolio.
+MIMS is a legacy ASP.NET application for managing medical and pharmacy inventory workflows. The Visual Studio solution is split into web, business, service, entity, interface, utility, and test projects.
 
-## What It Does
-- Provides a practical solution related to the project name: MIMS-master.
-- Includes source files, resources, and configuration needed to study or run the application.
-- Works as an individual project entry in Joseff Antonio Laverde Avendano's portfolio.
+## Solution structure
 
-## Detected Technologies
-- C#
-- JavaScript/TypeScript
-- HTML/CSS
+| Project | Responsibility |
+| --- | --- |
+| MIMS.Web | ASP.NET MVC 5 / Web API application, controllers, views, and browser assets |
+| MIMS.Business | Business logic and business-layer services |
+| MIMS.IBusiness | Business interfaces and contracts |
+| MIMS.Service | Service-layer components |
+| MIMS.Entity | Shared entities and data models |
+| MIMS.Utilities | Shared utilities |
+| MIMS.Web.Tests | MSTest-based unit and controller tests |
 
-## Requirements
-- Node.js 18 or newer if the project uses npm dependencies
+## Technology detected in the project files
 
-## Installation
-1. Clone or download this portfolio repository.
-2. Open the Projects/MIMS-master folder.
-3. Open the project in the matching editor or IDE, then compile or run the main file.
+- C# and .NET Framework 4.5
+- ASP.NET MVC 5.2.3 and ASP.NET Web API 2.2 (5.2.3 packages)
+- Dapper 1.42
+- Newtonsoft.Json 8.0.3
+- Razor / WebPages 3.2.3
+- SQL Server through System.Data.SqlClient
+- Visual Studio solution format from the Visual Studio 2013 generation
 
-## Usage
-- `Review the source files listed below and run the main file with the appropriate runtime or IDE.`
+These are the versions declared by the checked-in project and NuGet configuration files. This is a legacy stack and should be treated as a maintenance/learning project until dependencies and runtime support are modernized.
 
-## Main Structure
-- `.gitattributes`
-- `.gitignore`
-- `Intro/1.jpg`
-- `Intro/2.jpg`
-- `Intro/3.png`
-- `Intro/4.jpg`
-- `LICENSE`
-- `MIMS.Business/COM_UserBLL.cs`
-- `MIMS.Business/MIMS.Business.csproj`
-- `MIMS.Business/packages.config`
-- `MIMS.Business/PHA_AccountsBLL.cs`
-- `MIMS.Business/PHA_BaseInfoBLL.cs`
-- `MIMS.Business/PHA_DispenseWayBLL.cs`
-- `MIMS.Business/PHA_DosageFormBLL.cs`
-- `MIMS.Business/PHA_OrginBLL.cs`
-- `MIMS.Business/PHA_PhaAttrBLL.cs`
-- `MIMS.Business/PHA_RepositoryBLL.cs`
-- `MIMS.Business/PHA_StorageConditionBLL.cs`
-- `MIMS.Business/Properties/AssemblyInfo.cs`
-- `MIMS.Business/PSS_ExWarehouseBLL.cs`
-- `MIMS.Business/PSS_ExWarehouseDetailBLL.cs`
-- `MIMS.Business/PSS_ExWarehouseModeBLL.cs`
-- `MIMS.Business/PSS_InWarehouseBLL.cs`
-- `MIMS.Business/PSS_InWarehouseDetailBLL.cs`
-- `MIMS.Business/PSS_InWarehouseModeBLL.cs`
+## Prerequisites
 
-## Notes
-- If the project uses a database, review the `.sql` files, connection properties, or internal documentation before running it.
-- If compiled output exists (.class, 	arget, build, bin), rebuild from source to ensure compatibility with your local environment.
-- Some academic projects may need to be opened with an IDE such as NetBeans, Eclipse, IntelliJ IDEA, or Android Studio.
+- Windows
+- Visual Studio with the ASP.NET and web development workload
+- The .NET Framework 4.5 targeting/developer pack required by the solution
+- SQL Server with the MIMS and PharmacySystem databases provisioned
+- NuGet package restore access
 
-## Author
-Joseff Antonio Laverde Avendano
+## Open and build
+
+1. Open MIMS.sln in Visual Studio.
+2. Restore NuGet packages for the solution.
+3. Create the local SQL Server connection configuration as described below.
+4. Select MIMS.Web as the startup project.
+5. Build the solution, then run it using IIS Express or the configured local IIS profile.
+
+The solution uses old non-SDK-style project files and .NET Framework 4.5. It is not a cross-platform .NET CLI project.
+
+## Local SQL Server configuration
+
+The tracked Web.config and test App.config reference an external file named connectionStrings.config. This keeps environment-specific database credentials out of the tracked application configuration.
+
+For local development:
+
+1. Copy MIMS.Web/connectionStrings.config.example to MIMS.Web/connectionStrings.config.
+2. Copy MIMS.Web.Tests/connectionStrings.config.example to MIMS.Web.Tests/connectionStrings.config.
+3. Edit each local file for your SQL Server instance and database authentication method.
+4. Keep the real connectionStrings.config files untracked; the root .gitignore excludes them.
+
+The examples use Windows Integrated Security. If you need SQL authentication, put the username and password only in your local ignored files or a deployment secret store. Never put production credentials in Web.config, App.config, screenshots, issue comments, or commits.
+
+The application expects two named connections: MIMS and PharmacySystem. Ensure the corresponding databases and schema exist before running the application or its integration tests.
+
+## Tests
+
+MIMS.Web.Tests is a classic MSTest project targeting .NET Framework 4.5. Open the solution in a compatible Visual Studio installation, restore packages, configure the local test connection strings, and run tests through Test Explorer.
+
+Test execution has not been verified as part of this repository review. Older test projects may require a compatible Visual Studio Test Adapter and local database fixtures.
+
+## Security and maintenance backlog
+
+- Rotate any SQL Server credentials that were previously committed. Removing a password from the current files does not remove it from earlier Git commits.
+- Review every database query for parameterization; replace any SQL string concatenation that uses request or form input.
+- Audit authentication, authorization attributes, role filters, and session handling across controllers.
+- Set debug=false for production builds and review error handling and sensitive-data disclosure.
+- Upgrade the application from .NET Framework 4.5 to a supported target where feasible; plan a staged migration from ASP.NET MVC 5 / Web API 2 to modern ASP.NET Core.
+- Review old frontend dependencies (including bundled jQuery and EasyUI assets) for known security and compatibility issues.
+- Add automated integration tests using disposable databases rather than shared development or production data.
+
+## Scope note
+
+This update improves repository configuration hygiene and project documentation. It does not modernize the legacy framework or certify the application as production-ready.
