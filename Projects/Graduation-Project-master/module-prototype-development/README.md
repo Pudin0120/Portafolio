@@ -1,48 +1,23 @@
-websocket
-==================
-###
-    1.Eclipse
-    2.jdk1.7
-    3.android4.4.2
-    4.tomcat8.0
-    
-###
+# Module Prototype Development Notes
 
-###AndroidManifest.xml:
-    1.<uses-permission android:name="android.permission.INTERNET" />
-    
-[android-websocketwebsocketwebsocket("autobohn.jar"](https://github.com/tavendo/AutobahnAndroid)
+This folder preserves a short set of early WebSocket/Android integration notes from the smart-home prototype.
 
-[JSR-356 WebSocket API](http://www.jmatrix.org/java/382.html)
+The original note references:
+- Eclipse and JDK 7.
+- Android 4.4.2.
+- Tomcat 8.
+- Android internet permission and the Autobahn Android WebSocket library.
+- JSR-356 WebSocket API references.
+- JSON message parsing examples.
 
-[websocketwebsocket("autobohn.jar"](https://github.com/tavendo/AutobahnAndroid)
+These notes are historical and incomplete; they are not a standalone application or a reproducible build.
 
-[htmljavaeetomcat8websocket](http://blog.csdn.net/xiejx618/article/details/14519359)
+## Modernization guidance
 
-[jsr356 API](https://jcp.org/en/jsr/detail?id=356)
+- Use a maintained Android SDK and a supported JDK/Android Gradle Plugin.
+- Use secure WebSocket connections (WSS) with authenticated sessions.
+- Validate and version message payloads; do not parse untrusted JSON without schema/field validation.
+- Document reconnect behavior, timeouts, message size limits, and error handling.
+- Keep server credentials and device secrets outside source control.
 
-[websocket](http://www.tuicool.com/articles/fIFz6v)
-
-[Dos](http://www.cnblogs.com/rainman/p/3457227.html)
-
-[github for windows](http://www.cnblogs.com/zfanlong1314/p/3715490.html)
-
-###javajson:
-    1.String message"{\"firstName\":\"Brett\"}";
-    2.JSONObject json = JSONObject.fromObject(message);
-    3.json.get("firstName")
-###androidjson
-    1. try {
-    2.        json = new JSONObject(payload);
-    3.        json.getString("firstName");
-    4.       } catch (JSONException e) {
-    5.        // TODO Auto-generated catch block
-    6.        e.printStackTrace();
-    7.     }
-### Eclipse:
-    1.jar
-    2.Build Path -> Configure Build Paht...(Propertise->Java Build Path)Java Build  PathLibraries
-    4.JAR
-    5.PS: jarjar( )
-    
-
+For the wider architecture and the separate Android client modules, see the [parent project overview](../README.md) and [Android prototype notes](../technical-solutions/1_2-android-music-player-implementation/README.md).
