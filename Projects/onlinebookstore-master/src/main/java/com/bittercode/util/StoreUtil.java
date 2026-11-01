@@ -21,6 +21,39 @@ public class StoreUtil {
     }
 
     /**
+     * Escape untrusted text before writing it into an HTML response.
+     */
+    public static String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        StringBuilder escaped = new StringBuilder(value.length());
+        for (int index = 0; index < value.length(); index++) {
+            char current = value.charAt(index);
+            switch (current) {
+                case '&':
+                    escaped.append("&amp;");
+                    break;
+                case '<':
+                    escaped.append("&lt;");
+                    break;
+                case '>':
+                    escaped.append("&gt;");
+                    break;
+                case '"':
+                    escaped.append("&quot;");
+                    break;
+                case '\'':
+                    escaped.append("&#x27;");
+                    break;
+                default:
+                    escaped.append(current);
+            }
+        }
+        return escaped.toString();
+    }
+
+    /**
      * Modify the active tab in the page menu bar
      */
     public static void setActiveTab(PrintWriter pw, String activeTab) {
