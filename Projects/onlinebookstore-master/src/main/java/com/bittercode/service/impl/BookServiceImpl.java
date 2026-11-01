@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.bittercode.constant.ResponseCode;
@@ -145,28 +146,46 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<Book> getBooksByCommaSeperatedBookIds(String commaSeperatedBookIds) throws StoreException {
-        List<Book> books = new ArrayList<Book>();
-        Connection con = DBUtil.getConnection();
-        try {
-            String getBooksByCommaSeperatedBookIdsQuery = "SELECT * FROM " + BooksDBConstants.TABLE_BOOK
-                    + " WHERE " +
-                    BooksDBConstants.COLUMN_BARCODE + " IN ( " + commaSeperatedBookIds + " )";
-            PreparedStatement ps = con.prepareStatement(getBooksByCommaSeperatedBookIdsQuery);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                String bCode = rs.getString(1);
-                String bName = rs.getString(2);
-                String bAuthor = rs.getString(3);
-                int bPrice = rs.getInt(4);
-                int bQty = rs.getInt(5);
-
-                Book book = new Book(bCode, bName, bAuthor, bPrice, bQty);
-                books.add(book);
-            }
-        } catch (SQLException e) {
-
+        List<Book> books = new ArrayList<>();
+        if (commaSeperatedBookIds == null || commaSeperatedBookIds.trim().isEmpty()) {
+            return books;
         }
+
+        List<String> bookIds = new ArrayList<>();
+        for (String value : commaSeperatedBookIds.split(",")) {
+            String id = value.trim();
+            if (!id.isEmpty() && !bookIds.contains(id)) {
+                bookIds.add(id);
+            }
+        }
+        if (bookIds.isEmpty()) {
+            return books;
+        }
+
+        String placeholders = String.join(", ", Collections.nCopies(bookIds.size(), "?"));
+        String query = "SELECT * FROM " + BooksDBConstants.TABLE_BOOK
+                + " WHERE " + BooksDBConstants.COLUMN_BARCODE + " IN (" + placeholders + ")";
+
+        try (PreparedStatement statement = DBUtil.getConnection().prepareStatement(query)) {
+            for (int index = 0; index < bookIds.size(); index++) {
+                statement.setString(index + 1, bookIds.get(index));
+            }
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    Book book = new Book(
+                            result.getString(1),
+                            result.getString(2),
+                            result.getString(3),
+                            result.getInt(4),
+                            result.getInt(5));
+                    books.add(book);
+                }
+            }
+        } catch (SQLException exception) {
+            throw new StoreException(ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
         return books;
     }
 
