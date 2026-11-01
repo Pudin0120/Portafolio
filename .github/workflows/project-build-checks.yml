@@ -11,6 +11,7 @@ on:
       - 'Projects/JavaCodes/**'
       - 'Projects/onlinebookstore-master/**'
       - 'Projects/WeatherApp-Android-master/**'
+      - 'Projects/Women-Safety-App-master/**'
       - '.github/workflows/project-build-checks.yml'
   workflow_dispatch:
 
@@ -122,4 +123,20 @@ jobs:
           gradle-version: '7.5'
       - name: Assemble debug APK
         working-directory: Projects/WeatherApp-Android-master
+        run: gradle --no-daemon :app:assembleDebug
+
+  women-safety-android:
+    name: Women Safety prototype (Gradle 7.5 / Java 11)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '7.5'
+      - name: Assemble debug APK
+        working-directory: Projects/Women-Safety-App-master
         run: gradle --no-daemon :app:assembleDebug
