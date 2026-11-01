@@ -33,7 +33,7 @@ Authenticate with Infisical before running tasks that inject secrets:
 From this directory:
 
     task dev-up
-    task dev-watch
+    task dev-logs
 
 To check service status or view logs:
 
