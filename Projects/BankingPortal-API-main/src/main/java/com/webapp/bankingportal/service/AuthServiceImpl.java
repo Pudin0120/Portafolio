@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.webapp.bankingportal.dto.OtpRequest;
+import com.webapp.bankingportal.exception.AccountDoesNotExistException;
+import com.webapp.bankingportal.exception.OtpRetryLimitExceededException;
+import com.webapp.bankingportal.exception.UserInvalidException;
 import com.webapp.bankingportal.dto.OtpVerificationRequest;
 import com.webapp.bankingportal.dto.ResetPasswordRequest;
 import com.webapp.bankingportal.entity.PasswordResetToken;
