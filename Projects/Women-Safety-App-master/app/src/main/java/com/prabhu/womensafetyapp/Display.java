@@ -1,6 +1,5 @@
 package com.prabhu.womensafetyapp;
 
-
 import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -10,64 +9,52 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 
-public class Display extends Activity{
-	
+public class Display extends Activity {
 
-	Cursor c;
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_display);
-		
-		
-		SQLiteDatabase db;
-		db=openOrCreateDatabase("NumDB", Context.MODE_PRIVATE, null);
-		
-		   c=db.rawQuery("SELECT * FROM details", null);
-		   if(c.getCount()==0)
-		   {
-		       showMessage("Error", "No records found.");
-		       return;
-		   }
-		   StringBuffer buffer=new StringBuffer();
-		   while(c.moveToNext())
-		   {
-		       buffer.append("Name: "+c.getString(0)+"\n");
-		       buffer.append("Number: "+c.getString(1)+"\n");
-		   }
-		   showMessage("Details", buffer.toString());
-		Intent i_startservice=new Intent(Display.this,BgService.class);
-		startService(i_startservice);
-          
-		
-	}
-	
-	public void showMessage(String title,String message)
-    {
-        Builder builder=new Builder(this);
-        builder.setCancelable(true);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.show();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_display);
+        showRegisteredContacts();
     }
 
+    private void showRegisteredContacts() {
+        SQLiteDatabase database = openOrCreateDatabase("NumDB", Context.MODE_PRIVATE, null);
+        StringBuilder message = new StringBuilder();
 
-	
-	
-	public void back(View v) {
-		Intent i_back=new Intent(Display.this,MainActivity.class);
-		startActivity(i_back);
-		
-		}
-	
-	
+        try {
+            database.execSQL("CREATE TABLE IF NOT EXISTS details (name VARCHAR(80), number VARCHAR(20))");
+            try (Cursor contacts = database.rawQuery(
+                    "SELECT name, number FROM details ORDER BY rowid ASC", null)) {
+                while (contacts.moveToNext()) {
+                    message.append("Name: ").append(contacts.getString(0)).append("\n")
+                            .append("Number: ").append(contacts.getString(1)).append("\n\n");
+                }
+            }
+        } finally {
+            database.close();
+        }
 
+        if (message.length() == 0) {
+            showMessage("Emergency contacts", "No emergency contacts have been registered.");
+        } else {
+            showMessage("Registered emergency contacts", message.toString().trim());
+        }
+
+        startService(new Intent(Display.this, BgService.class));
+    }
+
+    private void showMessage(String title, String message) {
+        new Builder(this)
+                .setCancelable(true)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+    }
+
+    public void back(View view) {
+        startActivity(new Intent(Display.this, MainActivity.class));
+        finish();
+    }
 }
-
-
-
-
-
-
-
-
