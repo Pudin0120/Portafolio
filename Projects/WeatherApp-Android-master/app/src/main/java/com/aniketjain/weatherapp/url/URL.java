@@ -1,27 +1,37 @@
 package com.aniketjain.weatherapp.url;
 
+import android.net.Uri;
+
+import com.aniketjain.weatherapp.BuildConfig;
 import com.aniketjain.weatherapp.location.LocationCord;
 
 public class URL {
-    private String link;
-    private static String city_url;
+
+    private static final String API_BASE = "https://api.openweathermap.org/data/2.5/";
+
+    private final String link;
 
     public URL() {
-        link = "https://api.openweathermap.org/data/2.5/onecall?exclude=minutely&lat="
-                + LocationCord.lat + "&lon=" + LocationCord.lon + "&appid=" + LocationCord.API_KEY;
+        link = Uri.parse(API_BASE + "onecall")
+                .buildUpon()
+                .appendQueryParameter("exclude", "minutely")
+                .appendQueryParameter("lat", LocationCord.lat)
+                .appendQueryParameter("lon", LocationCord.lon)
+                .appendQueryParameter("appid", BuildConfig.WEATHER_API_KEY)
+                .build()
+                .toString();
     }
 
     public String getLink() {
         return link;
     }
 
-
-    public static void setCity_url(String cityName) {
-        city_url = "https://api.openweathermap.org/data/2.5/weather?&q=" + cityName + "&appid=" + LocationCord.API_KEY;
+    public static String getCityUrl(String cityName) {
+        return Uri.parse(API_BASE + "weather")
+                .buildUpon()
+                .appendQueryParameter("q", cityName)
+                .appendQueryParameter("appid", BuildConfig.WEATHER_API_KEY)
+                .build()
+                .toString();
     }
-
-    public static String getCity_url() {
-        return city_url;
-    }
-
 }
