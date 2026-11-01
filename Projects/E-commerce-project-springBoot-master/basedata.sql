@@ -33,10 +33,13 @@ username varchar(255) null,
 UNIQUE (username)
 );
 
-# insert default customers
-INSERT INTO CUSTOMER(address, email, password, role, username) VALUES
-                                                                   ('123, Albany Street', 'admin@nyan.cat', '123', 'ROLE_ADMIN', 'admin'),
-                                                                   ('765, 5th Avenue', 'lisa@gmail.com', '765', 'ROLE_NORMAL', 'lisa');
+-- No default accounts are seeded.
+-- Register a customer through the application. The userService encodes new
+-- passwords with BCrypt and upgrades legacy plain-text passwords on login.
+-- To grant administrator access to a deliberately selected account, first
+-- register it, then run a controlled role update in your local database:
+-- UPDATE CUSTOMER SET role = 'ROLE_ADMIN' WHERE username = 'your-admin-username';
+
 
 # create the product table
 CREATE TABLE IF NOT EXISTS PRODUCT(
