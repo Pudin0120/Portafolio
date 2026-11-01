@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.shashi.beans.TrainException;
 import com.shashi.beans.UserBean;
+import com.shashi.constant.ResponseCode;
 import com.shashi.constant.UserRole;
 import com.shashi.service.UserService;
 import com.shashi.service.impl.UserServiceImpl;
