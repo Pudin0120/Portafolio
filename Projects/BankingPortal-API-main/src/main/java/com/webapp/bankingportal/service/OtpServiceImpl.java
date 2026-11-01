@@ -118,16 +118,20 @@ public class OtpServiceImpl implements OtpService {
     }
 
     private void resetOtpAttempts(String accountNumber) {
-        otpLimitReachedTime = null;
-        val cache = cacheManager.getCache("otpAttempts");
-        if (cache != null) {
-            cache.put(accountNumber, 0);
+        val attemptsCache = cacheManager.getCache(OTP_ATTEMPTS_CACHE);
+        if (attemptsCache != null) {
+            attemptsCache.put(accountNumber, 0);
+        }
+
+        val limitCache = cacheManager.getCache(OTP_LIMIT_REACHED_CACHE);
+        if (limitCache != null) {
+            limitCache.evict(accountNumber);
         }
     }
 
     private int getOtpAttempts(String accountNumber) {
         var otpAttempts = 0;
-        val cache = cacheManager.getCache("otpAttempts");
+        val cache = cacheManager.getCache(OTP_ATTEMPTS_CACHE);
         if (cache == null) {
             return otpAttempts;
         }
