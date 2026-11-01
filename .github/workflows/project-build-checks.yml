@@ -9,6 +9,7 @@ on:
       - 'Projects/inventory-management-system-main/**'
       - 'Projects/Train-Ticket-Reservation-System-master/**'
       - 'Projects/JavaCodes/**'
+      - 'Projects/onlinebookstore-master/**'
       - '.github/workflows/project-build-checks.yml'
   workflow_dispatch:
 
@@ -86,3 +87,22 @@ jobs:
           mkdir -p "$RUNNER_TEMP/javac-out"
           javac -d "$RUNNER_TEMP/javac-out" Projects/JavaCodes/OpenWeatherMap.java "Projects/JavaCodes/Host-checker.java" "Projects/JavaCodes/passowrd&notes.java" Projects/JavaCodes/CryptoUtilSmokeTest.java
           java -cp "$RUNNER_TEMP/javac-out" CryptoUtilSmokeTest
+
+  onlinebookstore:
+    name: Online Bookstore WAR (Java 8)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: maven
+          cache-dependency-path: Projects/onlinebookstore-master/pom.xml
+      - name: Build WAR
+        run: mvn -B -f Projects/onlinebookstore-master/pom.xml -DskipTests package
+      - name: Verify password hashing
+        run: |
+          mkdir -p "$RUNNER_TEMP/bookstore-test"
+          javac -d "$RUNNER_TEMP/bookstore-test" Projects/onlinebookstore-master/src/main/java/com/bittercode/util/PasswordUtil.java Projects/onlinebookstore-master/tools/PasswordUtilSmokeTest.java
+          java -cp "$RUNNER_TEMP/bookstore-test" com.bittercode.util.PasswordUtilSmokeTest
