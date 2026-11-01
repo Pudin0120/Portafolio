@@ -1,110 +1,38 @@
-Androidandroid
-==================
+# Legacy Android Smart-Home Client Prototype
 
->##1android
+This folder preserves Android client prototypes and UI components associated with the smart-home graduation archive. Despite the historical folder name referring to a music player, the checked-in code includes a smart-home client with login, registration, a main activity, a menu/navigation library, and UI fragments.
 
->* [VameiJava/andorid](http://www.cnblogs.com/vamei/archive/2013/03/31/2991531.html)
+## What is included
 
->* [android](http://www.imooc.com/learn/96)
+- `MyCode/SmartHomeControlClientV1.0/SmartHomeControlClient/` — Android client source with MainActivity, LoginActivity, RegActivity, Android resources, and manifest.
+- `MyCode/SmartHomeControlClientV1.0/MenuActivity/` — a separate Android menu/activity module with home, profile, settings, and calendar fragments.
+- `MyCode/SmartHomeControlClientV1.0/ResideMenu/` — reusable sliding navigation component.
+- Android SDK/API documentation references and historical developer notes.
 
->* [android1](http://www.imooc.com/learn/107)
+## Legacy toolchain evidence
 
->* [android2](http://www.imooc.com/learn/142)
+The MenuActivity module uses the old `apply plugin: 'android'` Gradle plugin syntax and references a root project configuration that is not present in this folder snapshot. Its `project.properties` targets Android API 17 and marks the module as an Android library.
 
->* [android3](http://www.imooc.com/learn/179)
+The client manifest declares minimum API 8 and target API 18. These values and the plugin generation are obsolete. The client folder does not contain a standalone modern Gradle build or wrapper.
 
+## Build status
 
+This is not currently a reproducible modern Android Studio project. A build requires reconstructing the original root project settings, Android Gradle Plugin version, SDK/build-tools versions, dependency JARs, and project module graph.
 
+Recommended recovery sequence:
 
->*  [android](http://blog.csdn.net/flowingflying/article/category/790538/10)
+1. Import a copy of the project into a legacy-compatible environment, not the only copy of the source.
+2. Record the original package names, activities, manifest permissions, and resource references.
+3. Reconstruct the root Gradle settings and module references from the original project layout.
+4. Migrate the old Android plugin and support libraries in a separate branch.
+5. Replace deprecated APIs and add tests before changing the authentication or network flows.
 
->*  [android2](http://www.apkbus.com/android-830-1-1.html)
+## Security and compatibility
 
->*  [android3](http://blog.csdn.net/Android_Tutor/article/category/605365/3)
+- The manifest requests/uses internet-capable client behavior; verify all network endpoints before running the app.
+- Do not add Wi-Fi passwords, server credentials, API keys, or device-control secrets to Java source, XML resources, or Gradle files.
+- Use HTTPS with certificate validation for remote services.
+- Review login and registration logic before using real accounts; a UI login screen alone does not establish secure authentication.
+- Verify that any smart-home command is authenticated and authorized at the service/device boundary.
 
-
->##2android
-
->* [Android](http://blog.jobbole.com/73026/)
-
->*  [androidSDK_API](https://github.com/JamesonHuang/Graduation-Project/tree/master/%E6%8A%80%E6%9C%AF%E9%9A%BE%E7%82%B9%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/1_2.android%E5%AE%9E%E7%8E%B0%E9%9F%B3%E4%B9%90%E6%92%AD%E6%94%BE%E5%99%A8%EF%BC%88android%EF%BC%89/androidSDK_API%E6%89%8B%E5%86%8C)
-
->* [Android_SDK_.pdf](https://github.com/JamesonHuang/Graduation-Project/blob/master/%E6%8A%80%E6%9C%AF%E9%9A%BE%E7%82%B9%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/1_2.android%E5%AE%9E%E7%8E%B0%E9%9F%B3%E4%B9%90%E6%92%AD%E6%94%BE%E5%99%A8%EF%BC%88android%EF%BC%89/androidSDK_API%E6%89%8B%E5%86%8C/Android_SDK_%E4%B8%AD%E6%96%87%E5%BC%80%E5%8F%91%E6%96%87%E6%A1%A3.pdf)
-
->*  [androidSDK](http://developers.androidcn.com/offline.html)
-
->*  [androidSDK-Wiki](http://wikidroid.sinaapp.com/)
-
->*  [Android ](http://adchs.github.io/index.html)
-
-
-
->##3android
-
->* [android](http://yeungeek.com/android%E5%BC%80%E5%8F%91%E5%A4%A7%E7%89%9B%E5%8D%9A%E5%AE%A2/)
-
->* [android](http://blog.csdn.net/aaa2832/article/details/7719554)
-
->* [android](http://blog.chengyunfeng.com/?cat=46&paged=3)
-
->* [android2](http://www.cnblogs.com/qianxudetianxia/category/293007.html)
-
->* [android](http://www.apkbus.com/android-17627-1-1.html)
-
->* [android2](http://www.apkbus.com/android-19645-1-1.html)
-
->* [android](http://blog.csdn.net/innost/article/details/7648869)
-
->*  [-android](http://toughcoder.net/blog/2014/10/24/boosts-android-development-with-tools/)
-
-
->##4android
-
->* [AndroidAsync niosockethttpwebsocketsocket.io](http://hao.jobbole.com/androidasync/)
-
->##5android & 
-
->* [Android](http://blog.csdn.net/zhanghw0917/article/details/8921309)
-
->* [android](http://www.jb51.net/article/51052.htm)
-
->* [20](http://www.csdn.net/article/2013-07-09/2816161)
-
-
->##5bug
-
->* [socketAndroid](http://www.linuxidc.com/Linux/2012-08/69412.htm)
-
->* [surfaceView](http://www.cnblogs.com/xuling/archive/2011/06/06/android.html)
-
->* [android SDK](http://blog.163.com/stm32f103vct6@126/blog/static/166743479201311300341259/)
-
->* [bug:Andriod Atom x86](http://blog.csdn.net/rznice/article/details/40210213)
-
->* [android SDK](http://blog.163.com/stm32f103vct6@126/blog/static/166743479201311300341259/)
-
-
->##6slidingMenu
-
-
->* http://www.tuicool.com/articles/ZvIn63
-
->* http://blog.csdn.net/yangyu20121224/article/details/9255829
-
-qq
->* http://blog.csdn.net/androidbaibai/article/details/38731261
-
-bug
->* http://www.eoeandroid.com/thread-262755-1-1.html
-
->* http://gushedaoren.blog.163.com/blog/static/173663405201451911754149/
-
-
-
-
-
-
-
-
-
-
+This folder is preserved as an archived implementation/reference, not a currently supported Android release.
