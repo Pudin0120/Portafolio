@@ -1174,7 +1174,7 @@ export const projects: Project[] = [
     "classification": "Catálogo completo del repositorio"
   },
   {
-    "slug": "repo-fee-management-system",
+    "slug": "repo-fee-management-system-2",
     "title": "Fee Management System",
     "category": "desktop",
     "categoryLabel": "Aplicación / proyecto académico",
@@ -2033,7 +2033,7 @@ export const projects: Project[] = [
     "classification": "Catálogo completo del repositorio"
   },
   {
-    "slug": "repo-otp-generator",
+    "slug": "repo-otp-generator-2",
     "title": "OTP generator",
     "category": "fullstack",
     "categoryLabel": "Aplicación",
