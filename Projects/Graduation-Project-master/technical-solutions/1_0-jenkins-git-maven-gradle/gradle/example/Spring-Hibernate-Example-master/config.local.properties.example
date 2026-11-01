@@ -1,0 +1,6 @@
+# Copy to config.local.properties in the project working directory.
+# Replace placeholders with your local database account and password.
+datasource.jdbc.driverClassName=com.mysql.jdbc.Driver
+datasource.jdbc.url=jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8
+datasource.jdbc.username=local_app_user
+datasource.jdbc.password=replace-with-local-password
