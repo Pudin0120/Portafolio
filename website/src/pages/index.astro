@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { projects } from '../data/projects';
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout>
+<section class="hero section-wrap">
+<div class="hero-copy">
+<p class="eyebrow"><span class="status-dot"></span> SOFTWARE ENGINEERING · TUNJA, COLOMBIA</p>
+<h1>Construyo software con <span class="text-gradient">propósito y criterio técnico.</span></h1>
+<p class="hero-lead">Soy <strong>Joseff Laverde</strong>, desarrollador orientado a Backend y Full Stack. Trabajo en aplicaciones, APIs, bases de datos e interfaces para convertir ideas en soluciones claras y mantenibles.</p>
+<div class="hero-actions"><a class="button button-primary" href={`${base}proyectos/`}>Explorar proyectos ↗</a><a class="button button-secondary" href="mailto:joseffflaverde@gmail.com">Contactarme</a></div>
+<div class="hero-meta"><span><span class="meta-icon">⌘</span> Java · Python · TypeScript</span><span><span class="meta-icon">⌖</span> UPTC · Ingeniería de Sistemas</span></div>
+</div>
+<div class="terminal-card" aria-label="Terminal interactiva">
+<div class="terminal-top"><div class="terminal-lights"><i></i><i></i><i></i></div><span>joseff@portfolio: ~</span><span class="terminal-live">LIVE</span></div>
+<div class="terminal-body"><div class="terminal-intro"><span class="terminal-symbol">┌──(</span><strong>joseff㉿portfolio</strong><span class="terminal-symbol">)-[~]</span><p>Bienvenido. Escribe <code>help</code> para ver los comandos.</p></div>
+<div class="terminal-output" id="terminal-output" aria-live="polite"><p><span class="terminal-muted">system</span> Portafolio cargado correctamente.</p><p><span class="terminal-muted">tip</span> Prueba <code>about</code>, <code>stack</code> o <code>projects</code>.</p></div>
+<form class="terminal-form" id="terminal-form"><label for="terminal-input"><span>$</span></label><input id="terminal-input" name="command" type="text" placeholder="escribe un comando..." autocomplete="off" spellcheck="false" /><span class="terminal-cursor" aria-hidden="true"></span></form>
+</div></div></section>
+<section class="section-wrap bento-section">
+<div class="section-heading"><div><p class="eyebrow">01 / PERFIL TÉCNICO</p><h2>Ingeniería enfocada en construir.</h2></div><p>Una combinación de fundamentos, desarrollo de aplicaciones y herramientas actuales.</p></div>
+<div class="bento-grid">
+<article class="bento-card bento-main"><span class="card-index">01 — BACKEND</span><div><div class="bento-icon">⌘</div><h3>Lógica y arquitectura</h3><p>Servicios, APIs REST, validación de datos y separación de responsabilidades.</p></div><div class="tag-row"><span>Java</span><span>Spring Boot</span><span>Python</span><span>FastAPI</span></div></article>
+<article class="bento-card bento-front"><span class="card-index">02 — FRONTEND</span><div><div class="bento-icon">◈</div><h3>Interfaces funcionales</h3><p>Experiencias web responsive con componentes claros y tipado.</p></div><div class="tag-row"><span>TypeScript</span><span>React</span><span>Next.js</span></div></article>
+<article class="bento-card bento-data"><span class="card-index">03 — DATA</span><div><div class="bento-icon">⌁</div><h3>Persistencia y datos</h3><p>Modelado relacional, consultas SQL e integración de datos.</p></div><div class="tag-row"><span>PostgreSQL</span><span>MySQL</span><span>Supabase</span></div></article>
+<article class="bento-card bento-tools"><span class="card-index">04 — TOOLING</span><div><div class="bento-icon">⟡</div><h3>Entorno de desarrollo</h3><p>Control de versiones, contenedores y automatización de flujos.</p></div><div class="tag-row"><span>Git</span><span>Docker</span><span>Linux</span><span>GitHub Actions</span></div></article>
+</div></section>
+<section class="section-wrap featured-section">
+<div class="section-heading"><div><p class="eyebrow">02 / TRABAJO SELECCIONADO</p><h2>Proyectos con contexto.</h2></div><a class="text-link" href={`${base}proyectos/`}>Ver todos los proyectos ↗</a></div>
+<div class="featured-list">{projects.map((project,index)=><a class="featured-project" href={`${base}proyectos/${project.slug}/`}><span class="project-number">0{index+1}</span><div class="featured-project-copy"><span class="project-category">{project.categoryLabel} · {project.classification}</span><h3>{project.title}</h3><p>{project.summary}</p><div class="tag-row">{project.stack.slice(0,5).map((item)=><span>{item}</span>)}</div></div><span class="project-arrow" aria-hidden="true">↗</span></a>)}</div>
+</section>
+<section class="section-wrap closing-panel"><div><p class="eyebrow">03 / SIGUIENTE PASO</p><h2>¿Hablamos de software?</h2><p>Estoy abierto a conversar sobre oportunidades, colaboración y proyectos de desarrollo.</p></div><a class="button button-primary" href="mailto:joseffflaverde@gmail.com">Escríbeme ↗</a></section>
+</BaseLayout>
