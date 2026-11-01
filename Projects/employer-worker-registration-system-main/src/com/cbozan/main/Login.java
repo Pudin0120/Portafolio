@@ -103,7 +103,8 @@ public class Login extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 		
-				if(textField_username.getText().equals("") || String.valueOf(passwordField_password.getPassword()).equals("")) {
+				char[] passwordChars = passwordField_password.getPassword();
+				if(textField_username.getText().trim().isEmpty() || passwordChars.length == 0) {
 					
 					label_errorText.setText(errorText);
 				
@@ -111,8 +112,7 @@ public class Login extends JFrame{
 					
 					label_errorText.setText("");
 					LoginDAO loginDAO = new LoginDAO();
-					if(loginDAO.verifyLogin(textField_username.getText(), 
-							String.valueOf(passwordField_password.getPassword()))) {
+					if(loginDAO.verifyLogin(textField_username.getText(), new String(passwordChars))) {
 						JOptionPane.showMessageDialog(contentPane, "Login successful. Welcome", "Login", 
 								JOptionPane.INFORMATION_MESSAGE);
 						
@@ -129,6 +129,8 @@ public class Login extends JFrame{
 					}
 					
 				}
+					java.util.Arrays.fill(passwordChars, '\\0');
+					passwordField_password.setText("");
 				
 			}
 		});
