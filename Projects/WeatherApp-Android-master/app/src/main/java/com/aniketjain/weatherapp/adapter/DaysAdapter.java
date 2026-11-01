@@ -2,7 +2,6 @@ package com.aniketjain.weatherapp.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,31 +12,30 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.aniketjain.weatherapp.R;
 import com.aniketjain.weatherapp.update.UpdateUI;
-import com.aniketjain.weatherapp.url.URL;
 import com.github.ybq.android.spinkit.SpinKitView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class DaysAdapter extends RecyclerView.Adapter<DaysAdapter.DayViewHolder> {
+
     private final Context context;
+    private final JSONArray dailyForecast;
+    private final long currentTime;
 
-    public DaysAdapter(Context context) {
+    public DaysAdapter(Context context, JSONArray dailyForecast, long currentTime) {
         this.context = context;
+        this.dailyForecast = dailyForecast;
+        this.currentTime = currentTime;
     }
-
-    private String updated_at, min, max, pressure, wind_speed, humidity;
-    private int condition;
-    private long update_time, sunset, sunrise;
 
     @NonNull
     @Override
@@ -48,72 +46,67 @@ public class DaysAdapter extends RecyclerView.Adapter<DaysAdapter.DayViewHolder>
 
     @Override
     public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
-        getDailyWeatherInfo(position + 1, holder);
+        bindForecast(holder, position + 1);
     }
 
     @Override
     public int getItemCount() {
-        return 6;
-    }
-
-    @SuppressLint("DefaultLocale")
-    private void getDailyWeatherInfo(int i, DayViewHolder holder) {
-        URL url = new URL();
-        RequestQueue requestQueue = Volley.newRequestQueue(context);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url.getLink(), null, response -> {
-            try {
-                update_time = response.getJSONObject("current").getLong("dt");
-                updated_at = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(new Date((update_time * 1000) + (i * 864_000_00L)));   // i=0
-
-                condition = response.getJSONArray("daily").getJSONObject(i).getJSONArray("weather").getJSONObject(0).getInt("id");
-                sunrise = response.getJSONArray("daily").getJSONObject(i).getLong("sunrise");
-                sunset = response.getJSONArray("daily").getJSONObject(i).getLong("sunset");
-
-                min = String.format("%.0f", response.getJSONArray("daily").getJSONObject(i).getJSONObject("temp").getDouble("min") - 273.15);
-                max = String.format("%.0f", response.getJSONArray("daily").getJSONObject(i).getJSONObject("temp").getDouble("max") - 273.15);
-                pressure = response.getJSONArray("daily").getJSONObject(i).getString("pressure");
-                wind_speed = response.getJSONArray("daily").getJSONObject(i).getString("wind_speed");
-                humidity = response.getJSONArray("daily").getJSONObject(i).getString("humidity");
-
-                updateUI(holder);
-                hideProgressBar(holder);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }, null);
-        requestQueue.add(jsonObjectRequest);
-        Log.i("json_req", "Day " + i);
+        return dailyForecast == null ? 0 : Math.min(6, Math.max(0, dailyForecast.length() - 1));
     }
 
     @SuppressLint("SetTextI18n")
-    private void updateUI(DayViewHolder holder) {
-        String day = UpdateUI.TranslateDay(updated_at, context);
-        holder.dTime.setText(day);
-        holder.temp_min.setText(min + " degC");
-        holder.temp_max.setText(max + " degC");
-        holder.pressure.setText(pressure + " mb");
-        holder.wind.setText(wind_speed + " km/h");
-        holder.humidity.setText(humidity + "%");
-        holder.icon.setImageResource(
-                context.getResources().getIdentifier(
-                        UpdateUI.getIconID(condition, update_time, sunrise, sunset),
-                        "drawable",
-                        context.getPackageName()
-                ));
-    }
+    private void bindForecast(DayViewHolder holder, int dayIndex) {
+        try {
+            JSONObject day = dailyForecast.getJSONObject(dayIndex);
+            JSONObject weather = day.getJSONArray("weather").getJSONObject(0);
+            JSONObject temperature = day.getJSONObject("temp");
 
-    private void hideProgressBar(DayViewHolder holder) {
-        holder.progress.setVisibility(View.GONE);
-        holder.layout.setVisibility(View.VISIBLE);
+            long sunrise = day.getLong("sunrise");
+            long sunset = day.getLong("sunset");
+            int condition = weather.getInt("id");
+            String description = weather.optString("main", "");
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(currentTime * 1000L);
+            calendar.add(Calendar.DAY_OF_YEAR, dayIndex);
+            String dayName = new SimpleDateFormat("EEEE", Locale.ENGLISH)
+                    .format(new Date(calendar.getTimeInMillis()));
+
+            holder.dTime.setText(UpdateUI.TranslateDay(dayName, context));
+            holder.temp_min.setText(Math.round(temperature.getDouble("min")) + " °C");
+            holder.temp_max.setText(Math.round(temperature.getDouble("max")) + " °C");
+            holder.pressure.setText(day.optString("pressure", "--") + " mb");
+            holder.wind.setText(Math.round(day.optDouble("wind_speed", 0) * 3.6) + " km/h");
+            holder.humidity.setText(day.optString("humidity", "--") + "%");
+
+            int iconId = context.getResources().getIdentifier(
+                    UpdateUI.getIconID(condition, currentTime + (dayIndex * 86400L), sunrise, sunset),
+                    "drawable",
+                    context.getPackageName());
+            if (iconId != 0) {
+                holder.icon.setImageResource(iconId);
+            }
+            holder.progress.setVisibility(View.GONE);
+            holder.layout.setVisibility(View.VISIBLE);
+        } catch (JSONException | RuntimeException exception) {
+            holder.progress.setVisibility(View.GONE);
+            holder.layout.setVisibility(View.VISIBLE);
+            holder.dTime.setText(context.getString(R.string.forecast_unavailable));
+            holder.temp_min.setText("--");
+            holder.temp_max.setText("--");
+            holder.pressure.setText("--");
+            holder.wind.setText("--");
+            holder.humidity.setText("--");
+        }
     }
 
     static class DayViewHolder extends RecyclerView.ViewHolder {
-        SpinKitView progress;
-        RelativeLayout layout;
-        TextView dTime, temp_min, temp_max, pressure, wind, humidity;
-        ImageView icon;
+        final SpinKitView progress;
+        final RelativeLayout layout;
+        final TextView dTime, temp_min, temp_max, pressure, wind, humidity;
+        final ImageView icon;
 
-        public DayViewHolder(@NonNull View itemView) {
+        DayViewHolder(@NonNull View itemView) {
             super(itemView);
             progress = itemView.findViewById(R.id.day_progress_bar);
             layout = itemView.findViewById(R.id.day_relative_layout);
