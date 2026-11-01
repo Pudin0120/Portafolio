@@ -4,18 +4,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.security.SecureRandom;
+import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.spec.GCMParameterSpec;
+import java.util.Locale;
+import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
+import java.security.GeneralSecurityException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.Base64;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.PBEParameterSpec;
 
 
 // This class is used to create a loading screen
@@ -145,9 +149,8 @@ class HashtablePassword implements hashTableMap {
             }
             if(entry == NIL)continue;
             if(entry.key.equals(Account)){
-                Object oldValue = entry.value;
                 entries[j].value = passwd;
-                return (int) oldValue;
+                return h;
             }
         }
         return h;
@@ -172,6 +175,7 @@ class HashtablePassword implements hashTableMap {
         for(int i = 0; i < entries.length; i++){
             int j = nextProbe(h,i);
             Entry entry = entries[j];
+            if(entry == null)break;
             if(entry == NIL)continue;
             if(entry.key.equals(Account)){
                 Object Value = entry.value;
@@ -183,101 +187,116 @@ class HashtablePassword implements hashTableMap {
         return null;
     }
 }
-class CryptoUtil 
-{
+class CryptoUtil {
 
-    Cipher ecipher;
-    Cipher dcipher;
-    // 8-byte Salt
-    byte[] salt = {
-        (byte) 0xA9, (byte) 0x9B, (byte) 0xC8, (byte) 0x32,
-        (byte) 0x56, (byte) 0x35, (byte) 0xE3, (byte) 0x03
-    };
-    // Iteration count
-    int iterationCount = 19;
+    private static final byte FORMAT_VERSION = 2;
+    private static final int SALT_LENGTH = 16;
+    private static final int NONCE_LENGTH = 12;
+    private static final int ITERATIONS = 210_000;
+    private static final int KEY_LENGTH_BITS = 256;
+    private static final int TAG_LENGTH_BITS = 128;
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final String PREFIX = "v2:";
 
-    public CryptoUtil() {
-
-    }
-
-    /**
-     *
-     * @param secretKey Key used to encrypt data
-     * @param plainText Text input to be encrypted
-     * @return Returns encrypted text
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws java.security.spec.InvalidKeySpecException
-     * @throws javax.crypto.NoSuchPaddingException
-     * @throws java.security.InvalidKeyException
-     * @throws java.security.InvalidAlgorithmParameterException
-     * @throws java.io.UnsupportedEncodingException
-     * @throws javax.crypto.IllegalBlockSizeException
-     * @throws javax.crypto.BadPaddingException
-     *
-     */
     public String encrypt(String secretKey, String plainText)
-            throws NoSuchAlgorithmException,
-            InvalidKeySpecException,
-            NoSuchPaddingException,
-            InvalidKeyException,
-            InvalidAlgorithmParameterException,
-            UnsupportedEncodingException,
-            IllegalBlockSizeException,
-            BadPaddingException {
-        //Key generation for enc and desc
-        KeySpec keySpec = new PBEKeySpec(secretKey.toCharArray(), salt, iterationCount);
-        SecretKey key = SecretKeyFactory.getInstance("PBEWithMD5AndDES").generateSecret(keySpec);
-        // Prepare the parameter to the ciphers
-        AlgorithmParameterSpec paramSpec = new PBEParameterSpec(salt, iterationCount);
+            throws GeneralSecurityException {
+        validateSecret(secretKey);
+        if (plainText == null) {
+            throw new IllegalArgumentException("Text to encrypt cannot be null.");
+        }
 
-        //Enc process
-        ecipher = Cipher.getInstance(key.getAlgorithm());
-        ecipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
-        String charSet = "UTF-8";
-        byte[] in = plainText.getBytes(charSet);
-        byte[] out = ecipher.doFinal(in);
-        String encStr = new String(Base64.getEncoder().encode(out));
-        return encStr;
+        byte[] salt = new byte[SALT_LENGTH];
+        byte[] nonce = new byte[NONCE_LENGTH];
+        RANDOM.nextBytes(salt);
+        RANDOM.nextBytes(nonce);
+
+        byte[] keyBytes = deriveKey(secretKey, salt);
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE,
+                    new SecretKeySpec(keyBytes, "AES"),
+                    new GCMParameterSpec(TAG_LENGTH_BITS, nonce));
+            cipher.updateAAD(new byte[] { FORMAT_VERSION });
+
+            byte[] encrypted = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+            ByteBuffer payload = ByteBuffer.allocate(1 + SALT_LENGTH + NONCE_LENGTH + encrypted.length);
+            payload.put(FORMAT_VERSION);
+            payload.put(salt);
+            payload.put(nonce);
+            payload.put(encrypted);
+
+            return PREFIX + Base64.getEncoder().encodeToString(payload.array());
+        } finally {
+            Arrays.fill(keyBytes, (byte) 0);
+        }
     }
 
-    /**
-     * @param secretKey Key used to decrypt data
-     * @param encryptedText encrypted text input to decrypt
-     * @return Returns plain text after decryption
-     * @throws java.security.NoSuchAlgorithmException
-     * @throws java.security.spec.InvalidKeySpecException
-     * @throws javax.crypto.NoSuchPaddingException
-     * @throws java.security.InvalidKeyException
-     * @throws java.security.InvalidAlgorithmParameterException
-     * @throws java.io.UnsupportedEncodingException
-     * @throws javax.crypto.IllegalBlockSizeException
-     * @throws javax.crypto.BadPaddingException
-     */
     public String decrypt(String secretKey, String encryptedText)
-            throws NoSuchAlgorithmException,
-            InvalidKeySpecException,
-            NoSuchPaddingException,
-            InvalidKeyException,
-            InvalidAlgorithmParameterException,
-            UnsupportedEncodingException,
-            IllegalBlockSizeException,
-            BadPaddingException,
-            IOException {
-        //Key generation for enc and desc
-        KeySpec keySpec = new PBEKeySpec(secretKey.toCharArray(), salt, iterationCount);
-        SecretKey key = SecretKeyFactory.getInstance("PBEWithMD5AndDES").generateSecret(keySpec);
-        // Prepare the parameter to the ciphers
-        AlgorithmParameterSpec paramSpec = new PBEParameterSpec(salt, iterationCount);
-        //Decryption process; same key will be used for decr
-        dcipher = Cipher.getInstance(key.getAlgorithm());
-        dcipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
-        byte[] enc = Base64.getDecoder().decode(encryptedText);
-        byte[] utf8 = dcipher.doFinal(enc);
-        String charSet = "UTF-8";
-        String plainStr = new String(utf8, charSet);
-        return plainStr;
-    }    
-   
+            throws GeneralSecurityException {
+        validateSecret(secretKey);
+        if (encryptedText == null || !encryptedText.startsWith(PREFIX)) {
+            throw new IllegalArgumentException(
+                    "Unsupported ciphertext format. Only authenticated v2 data can be decrypted.");
+        }
+
+        final byte[] payload;
+        try {
+            payload = Base64.getDecoder().decode(encryptedText.substring(PREFIX.length()));
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Ciphertext is not valid Base64.", exception);
+        }
+
+        int minimumLength = 1 + SALT_LENGTH + NONCE_LENGTH + (TAG_LENGTH_BITS / 8);
+        if (payload.length < minimumLength) {
+            throw new IllegalArgumentException("Ciphertext is incomplete.");
+        }
+
+        ByteBuffer buffer = ByteBuffer.wrap(payload);
+        byte version = buffer.get();
+        if (version != FORMAT_VERSION) {
+            throw new IllegalArgumentException("Unsupported ciphertext version.");
+        }
+
+        byte[] salt = new byte[SALT_LENGTH];
+        byte[] nonce = new byte[NONCE_LENGTH];
+        byte[] encrypted = new byte[buffer.remaining() - NONCE_LENGTH];
+        buffer.get(salt);
+        buffer.get(nonce);
+        buffer.get(encrypted);
+
+        byte[] keyBytes = deriveKey(secretKey, salt);
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE,
+                    new SecretKeySpec(keyBytes, "AES"),
+                    new GCMParameterSpec(TAG_LENGTH_BITS, nonce));
+            cipher.updateAAD(new byte[] { FORMAT_VERSION });
+            byte[] plainText = cipher.doFinal(encrypted);
+            return new String(plainText, StandardCharsets.UTF_8);
+        } finally {
+            Arrays.fill(keyBytes, (byte) 0);
+        }
+    }
+
+    private static void validateSecret(String secretKey) {
+        if (secretKey == null || secretKey.length() < 12) {
+            throw new IllegalArgumentException("Use a secret key with at least 12 characters.");
+        }
+    }
+
+    private byte[] deriveKey(String secretKey, byte[] salt)
+            throws GeneralSecurityException {
+        char[] password = secretKey.toCharArray();
+        PBEKeySpec keySpec = new PBEKeySpec(
+                password, salt, ITERATIONS, KEY_LENGTH_BITS);
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            return factory.generateSecret(keySpec).getEncoded();
+        } finally {
+            keySpec.clearPassword();
+            Arrays.fill(password, (char) 0);
+        }
+    }
 }
 
 class PasswordGenerator {
@@ -320,7 +339,8 @@ class PasswordManager implements ActionListener {
     JLabel lAcc,lPass;
     JTextArea encryptPasswdArea, genePassArea, searchPassArea;
     JButton PassGeneBtn,PassEncryptBtn, PassStoreBtn, PassSearchBtn, AccAddBtn, PassDeleteBtn;
-    JTextField tAcc,tPass;
+    JTextField tAcc;
+    JPasswordField tPass;
     JButton addNoteBtn;
     JLabel addNoteLabel;
     JTextArea tNote;
@@ -390,7 +410,7 @@ class PasswordManager implements ActionListener {
         lPass.setFont(fn);
         conn2.add(lPass);
 
-        tPass = new JTextField();
+        tPass = new JPasswordField();
         tPass.setBounds(90,200,200,50);
         tPass.setFont(fn);
         tPass.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
@@ -473,8 +493,9 @@ class PasswordManager implements ActionListener {
             {
                 try{
                     String text = JOptionPane.showInputDialog("Enter the text to encrypt");
-                    String secretKey = JOptionPane.showInputDialog("Enter the secret key");
-                    if(text.length()>0 && secretKey.length()>0)
+                    String secretKey = JOptionPane.showInputDialog("Enter a secret key (at least 12 characters)");
+                    if(text != null && !text.isEmpty()
+                            && secretKey != null && secretKey.length() >= 12)
                     {
                         //  password generator class reference
                         CryptoUtil pass1 = new CryptoUtil();
@@ -535,9 +556,11 @@ class PasswordManager implements ActionListener {
                     // action on the Store btn
                     AccAddBtn.addActionListener(e4 -> {
                         if (AccAddBtn == e4.getSource()) {
-                            String account_name = tAcc.getText(); // getting the account name
-                            String acc_pass = tPass.getText(); // getting the password
-                            if (account_name.isEmpty() && acc_pass.isEmpty()) {
+                            String account_name = tAcc.getText().trim().toLowerCase(Locale.ROOT);
+                            char[] passwordChars = tPass.getPassword();
+                            String acc_pass = new String(passwordChars);
+                            Arrays.fill(passwordChars, (char) 0);
+                            if (account_name.isEmpty() || acc_pass.isEmpty()) {
                                 JOptionPane.showMessageDialog(conn2,"unable to store your password!","ERROR",JOptionPane.ERROR_MESSAGE);
                             }
                             else{
@@ -565,8 +588,8 @@ class PasswordManager implements ActionListener {
             if (PassSearchBtn ==e.getSource()){
                 try{
                     String acc_name = JOptionPane.showInputDialog("Enter your Account Name"); // getting the account name
-                    if (!acc_name.isBlank()) { // checking if the account name is not empty
-                        Object pass = data.get_Acc(acc_name.toLowerCase()); // getting the password of the account name
+                    if (acc_name != null && !acc_name.trim().isEmpty()) { // checking if the account name is not empty
+                        Object pass = data.get_Acc(acc_name.trim().toLowerCase(Locale.ROOT)); // getting the password of the account name
                         if(pass!=null) { // checking if the password is not null
                             searchPassArea = new JTextArea(4,5); // text area for the password
                             textArea(String.valueOf(pass), searchPassArea); // setting the text area
