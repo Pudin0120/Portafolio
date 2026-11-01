@@ -41,7 +41,6 @@ public class Display extends Activity {
             showMessage("Registered emergency contacts", message.toString().trim());
         }
 
-        startService(new Intent(Display.this, BgService.class));
     }
 
     private void showMessage(String title, String message) {
