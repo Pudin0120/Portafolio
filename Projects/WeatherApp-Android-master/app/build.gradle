@@ -12,7 +12,7 @@ android {
         versionCode 5
         versionName "1.0.5"
         multiDexEnabled true
-        buildConfigField "String", "WEATHER_API_KEY", "\\"${project.findProperty('WEATHER_API_KEY') ?: System.getenv('WEATHER_API_KEY') ?: ''}\\""
+        buildConfigField "String", "WEATHER_API_KEY", "\"${project.findProperty('WEATHER_API_KEY') ?: System.getenv('WEATHER_API_KEY') ?: ''}\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
