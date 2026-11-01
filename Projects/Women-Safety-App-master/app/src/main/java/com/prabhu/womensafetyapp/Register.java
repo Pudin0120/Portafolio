@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
@@ -47,38 +46,34 @@ public class Register extends Activity {
         }
 
         SQLiteDatabase database = openOrCreateDatabase("NumDB", Context.MODE_PRIVATE, null);
+        boolean saved = false;
         try {
+            database.beginTransaction();
             database.execSQL("CREATE TABLE IF NOT EXISTS details (name VARCHAR(80), number VARCHAR(20))");
-
-            Cursor contacts = database.rawQuery("SELECT COUNT(*) FROM details", null);
-            int contactCount = 0;
-            try {
-                if (contacts.moveToFirst()) {
-                    contactCount = contacts.getInt(0);
-                }
-            } finally {
-                contacts.close();
-            }
-
-            if (contactCount >= 2) {
-                database.execSQL(
-                        "DELETE FROM details WHERE rowid = (SELECT rowid FROM details ORDER BY rowid ASC LIMIT 1)");
-            }
 
             ContentValues values = new ContentValues();
             values.put("name", contactName);
             values.put("number", phoneNumber);
             long insertedId = database.insert("details", null, values);
 
-            if (insertedId == -1) {
-                Toast.makeText(this, "Unable to save this contact.", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Emergency contact saved.", Toast.LENGTH_SHORT).show();
-                name.setText("");
-                number.setText("");
+            if (insertedId != -1) {
+                database.execSQL(
+                        "DELETE FROM details WHERE rowid IN " +
+                        "(SELECT rowid FROM details ORDER BY rowid DESC LIMIT -1 OFFSET 2)");
+                database.setTransactionSuccessful();
+                saved = true;
             }
         } finally {
+            database.endTransaction();
             database.close();
+        }
+
+        if (saved) {
+            Toast.makeText(this, "Emergency contact saved.", Toast.LENGTH_SHORT).show();
+            name.setText("");
+            number.setText("");
+        } else {
+            Toast.makeText(this, "Unable to save this contact.", Toast.LENGTH_SHORT).show();
         }
     }
 
