@@ -1,0 +1,6 @@
+# Copy to db.local.properties in the SmartHome application working directory.
+# Replace values with credentials for a dedicated local MySQL account.
+db.driver=com.mysql.jdbc.Driver
+db.url=jdbc:mysql://localhost:3306/db_smart_home
+db.username=smart_home_local
+db.password=replace-with-local-password
