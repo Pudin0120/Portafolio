@@ -614,7 +614,7 @@ class PasswordManager implements ActionListener {
             if (PassDeleteBtn == e.getSource()) {
                 try {
                     String acc_name = JOptionPane.showInputDialog("Enter the Account Name"); // getting the account name
-                    if (!acc_name.isBlank()) {
+                    if (!acc_name.trim().isEmpty()) {
                         data.remove_Acc(acc_name.toLowerCase()); // removing the account name and password from the hashtable
                         JOptionPane.showMessageDialog(conn1, "Delete successfully!"); // showing the message
                     }
