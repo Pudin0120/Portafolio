@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.bittercode.constant.BookStoreConstants;
 import com.bittercode.constant.db.UsersDBConstants;
@@ -15,38 +16,45 @@ import com.bittercode.model.User;
 import com.bittercode.model.UserRole;
 import com.bittercode.service.UserService;
 import com.bittercode.service.impl.UserServiceImpl;
+import com.bittercode.util.StoreUtil;
 
 public class SellerLoginServlet extends HttpServlet {
 
-    UserService userService = new UserServiceImpl();
+    private final UserService userService = new UserServiceImpl();
 
-    public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-        PrintWriter pw = res.getWriter();
-        res.setContentType(BookStoreConstants.CONTENT_TYPE_TEXT_HTML);
-        String uName = req.getParameter(UsersDBConstants.COLUMN_USERNAME);
-        String pWord = req.getParameter(UsersDBConstants.COLUMN_PASSWORD);
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType(BookStoreConstants.CONTENT_TYPE_TEXT_HTML + "; charset=UTF-8");
+        PrintWriter writer = response.getWriter();
+
         try {
-            User user = userService.login(UserRole.SELLER, uName, pWord, req.getSession());
+            String username = request.getParameter(UsersDBConstants.COLUMN_USERNAME);
+            String password = request.getParameter(UsersDBConstants.COLUMN_PASSWORD);
+            User user = userService.login(UserRole.SELLER, username, password);
+
             if (user != null) {
-                RequestDispatcher rd = req.getRequestDispatcher("SellerHome.html");
+                HttpSession previousSession = request.getSession(false);
+                if (previousSession != null) {
+                    previousSession.invalidate();
+                }
+                HttpSession authenticatedSession = request.getSession(true);
+                authenticatedSession.setAttribute(UserRole.SELLER.toString(), user.getEmailId());
 
-                rd.include(req, res);
-                pw.println("    <div id=\"topmid\"><h1>Welcome to Online <br>Book Store</h1></div>\r\n"
-                        + "    <br>\r\n"
-                        + "    <table class=\"tab\">\r\n"
-                        + "        <tr>\r\n"
-                        + "            <td><p>Welcome "+user.getFirstName()+", Happy Learning !!</p></td>\r\n"
-                        + "        </tr>\r\n"
-                        + "    </table>");
+                RequestDispatcher dispatcher = request.getRequestDispatcher("SellerHome.html");
+                dispatcher.include(request, response);
+                writer.println("<div id=\"topmid\"><h1>Welcome to Online <br>Book Store</h1></div>");
+                writer.println("<br><table class=\"tab\"><tr><td><p>Welcome "
+                        + StoreUtil.escapeHtml(user.getFirstName())
+                        + ", Happy Learning !!</p></td></tr></table>");
             } else {
-
-                RequestDispatcher rd = req.getRequestDispatcher("SellerLogin.html");
-                rd.include(req, res);
-                pw.println("<div class=\"tab\">Incorrect UserName or PassWord</div>");
+                RequestDispatcher dispatcher = request.getRequestDispatcher("SellerLogin.html");
+                dispatcher.include(request, response);
+                writer.println("<div class=\"tab\">Incorrect username or password.</div>");
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception exception) {
+            throw new ServletException("Unable to complete seller login.", exception);
         }
     }
 }
