@@ -75,6 +75,8 @@ On Windows, use mvnw.cmd instead of ./mvnw. The application is configured for po
 - The service also upgrades legacy plain-text passwords to BCrypt when an account is loaded for authentication.
 - The SQL setup no longer creates predictable admin/customer demo accounts.
 - Register a user through the application, then grant administrator access only to an intentionally selected account in your local database by setting its role to ROLE_ADMIN.
+- Profile updates now resolve the target account from the authenticated principal instead of trusting a submitted user ID, preventing a straightforward IDOR account-takeover path.
+- User and administrator logout now use CSRF-protected POST forms and invalidate the session.
 - Review account recovery, input validation, rate limiting, and authorization rules before using real customer accounts.
 
 ## Main source areas
@@ -89,6 +91,7 @@ On Windows, use mvnw.cmd instead of ./mvnw. The application is configured for po
 ## Known limitations and next improvements
 
 - The current project uses the older Spring Boot 2.6.4 generation and javax-era dependencies. Plan an incremental upgrade rather than changing the framework version without integration testing.
+- Profile update endpoints should continue to be tested for ownership enforcement and should never trust client-supplied user IDs.
 - Review Hibernate schema auto-update behavior; use explicit migrations and HIBERNATE_DDL_AUTO=validate for controlled environments.
 - Replace the direct DriverManagerDataSource with a managed connection pool before production use.
 - Review logout behavior and convert state-changing logout requests to POST forms where the UI permits.
