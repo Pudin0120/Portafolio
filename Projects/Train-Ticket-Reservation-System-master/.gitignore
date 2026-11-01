@@ -1,2 +1,5 @@
 /build/
 /target/
+
+# Local environment credentials
+src/application.local.properties
