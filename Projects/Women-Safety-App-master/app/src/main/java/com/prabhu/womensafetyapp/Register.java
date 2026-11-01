@@ -1,6 +1,7 @@
 package com.prabhu.womensafetyapp;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -11,73 +12,80 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class Register extends Activity {
-	
-	EditText name,number;
-    
 
+    private EditText name;
+    private EditText number;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_register);
-		//Toast.makeText(getApplicationContext(), "Activity created",Toast.LENGTH_LONG).show();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+    }
 
-	}
-	
-	
-	
-	public void display(View v) {
-		Intent i_view=new Intent(Register.this,Display.class);
-		startActivity(i_view);
-			
-		}
-	
-	public void instructions(View v) {
-		Intent i_help=new Intent(Register.this,Instructions.class);
-		startActivity(i_help);
-		
-		}
-	
-	public void storeInDB(View v) {
-		Toast.makeText(getApplicationContext(), "save started",Toast.LENGTH_LONG).show();
-		name = (EditText) this.findViewById(R.id.editText1);
-		number = (EditText) this.findViewById(R.id.editText2);
-		String str_name=name.getText().toString();
-		String str_number=number.getText().toString();
-		SQLiteDatabase db;
-		db=openOrCreateDatabase("NumDB", Context.MODE_PRIVATE, null);
-		//Toast.makeText(getApplicationContext(), "db created",Toast.LENGTH_LONG).show();
-		
-		db.execSQL("CREATE TABLE IF NOT EXISTS details(name VARCHAR,number VARCHAR);");
-		//Toast.makeText(getApplicationContext(), "table created",Toast.LENGTH_LONG).show();
-		
-		Cursor c=db.rawQuery("SELECT * FROM details", null);
-		   if(c.getCount()<2)
-		   {
-			   db.execSQL("INSERT INTO details VALUES('"+str_name+"','"+str_number+"');");
-			   Toast.makeText(getApplicationContext(), "Successfully Saved",Toast.LENGTH_SHORT).show();
-		   }
-		   else {
-			   
-			   db.execSQL("INSERT INTO details VALUES('"+str_name+"','"+str_number+"');");
-       		   Toast.makeText(getApplicationContext(), "Maximun Numbers limited reached. Previous numbers are replaced.",Toast.LENGTH_SHORT).show();
-		   }
-		
-		
-		db.close();
-			
-		}
-	
-	
-	
+    public void display(View view) {
+        startActivity(new Intent(Register.this, Display.class));
+    }
 
-	
-	
-	
-	
-	
-	
-	
+    public void instructions(View view) {
+        startActivity(new Intent(Register.this, Instructions.class));
+    }
 
+    public void storeInDB(View view) {
+        name = findViewById(R.id.editText1);
+        number = findViewById(R.id.editText2);
 
+        String contactName = name.getText().toString().trim();
+        String phoneNumber = normalizePhone(number.getText().toString());
+
+        if (contactName.isEmpty() || contactName.length() > 80) {
+            name.setError("Enter a name (maximum 80 characters).");
+            return;
+        }
+        if (!phoneNumber.matches("\\+?[0-9]{7,15}")) {
+            number.setError("Enter a valid phone number.");
+            return;
+        }
+
+        SQLiteDatabase database = openOrCreateDatabase("NumDB", Context.MODE_PRIVATE, null);
+        try {
+            database.execSQL("CREATE TABLE IF NOT EXISTS details (name VARCHAR(80), number VARCHAR(20))");
+
+            Cursor contacts = database.rawQuery("SELECT COUNT(*) FROM details", null);
+            int contactCount = 0;
+            try {
+                if (contacts.moveToFirst()) {
+                    contactCount = contacts.getInt(0);
+                }
+            } finally {
+                contacts.close();
+            }
+
+            if (contactCount >= 2) {
+                database.execSQL(
+                        "DELETE FROM details WHERE rowid = (SELECT rowid FROM details ORDER BY rowid ASC LIMIT 1)");
+            }
+
+            ContentValues values = new ContentValues();
+            values.put("name", contactName);
+            values.put("number", phoneNumber);
+            long insertedId = database.insert("details", null, values);
+
+            if (insertedId == -1) {
+                Toast.makeText(this, "Unable to save this contact.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Emergency contact saved.", Toast.LENGTH_SHORT).show();
+                name.setText("");
+                number.setText("");
+            }
+        } finally {
+            database.close();
+        }
+    }
+
+    private String normalizePhone(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.trim().replaceAll("[\\s()-]", "");
+    }
 }
