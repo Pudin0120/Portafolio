@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
     private static final int EXPIRATION_HOURS = 24;
+    private static final String GENERIC_OTP_RESPONSE =
+            "If an account matches the supplied identifier, a verification code will be sent.";
 
     private final OtpService otpService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
@@ -63,12 +65,22 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<String> sendOtpForPasswordReset(OtpRequest otpRequest) {
-        log.info("Received OTP request for identifier: {}", otpRequest.identifier());
-        val user = userService.getUserByIdentifier(otpRequest.identifier());
-        val accountNumber = user.getAccount().getAccountNumber();
-        val generatedOtp = otpService.generateOTP(accountNumber);
+        try {
+            val user = userService.getUserByIdentifier(otpRequest.identifier());
+            val accountNumber = user.getAccount().getAccountNumber();
+            val generatedOtp = otpService.generateOTP(accountNumber);
+            otpService.sendOTPByEmail(
+                    user.getEmail(), user.getName(), accountNumber, generatedOtp).join();
+        } catch (UserInvalidException | AccountDoesNotExistException
+                | OtpRetryLimitExceededException exception) {
+            // Keep the response identical so callers cannot enumerate valid accounts.
+            log.debug("Password reset OTP request was not eligible for delivery.");
+        } catch (RuntimeException exception) {
+            // Do not expose account identifiers, email addresses, or provider details.
+            log.warn("Password reset OTP delivery could not be completed.");
+        }
 
-        return sendOtpEmail(user, accountNumber, generatedOtp);
+        return ResponseEntity.accepted().body(GENERIC_OTP_RESPONSE);
     }
 
     @Override
@@ -111,18 +123,6 @@ public class AuthServiceImpl implements AuthService {
         return existingToken != null && existingToken.getExpiryDateTime().isAfter(LocalDateTime.now().plusMinutes(5));
     }
 
-    private ResponseEntity<String> sendOtpEmail(User user, String accountNumber, String generatedOtp) {
-        val emailSendingFuture = otpService.sendOTPByEmail(user.getEmail(), user.getName(), accountNumber,
-                generatedOtp);
-
-        val successResponse = ResponseEntity
-                .ok(String.format(ApiMessages.OTP_SENT_SUCCESS.getMessage(), user.getEmail()));
-        val failureResponse = ResponseEntity.internalServerError()
-                .body(String.format(ApiMessages.OTP_SENT_FAILURE.getMessage(), user.getEmail()));
-
-        return emailSendingFuture.thenApply(result -> successResponse)
-                .exceptionally(e -> failureResponse).join();
-    }
 
     private void validateOtpRequest(OtpVerificationRequest otpVerificationRequest) {
         if (otpVerificationRequest.identifier() == null || otpVerificationRequest.identifier().isEmpty()) {
