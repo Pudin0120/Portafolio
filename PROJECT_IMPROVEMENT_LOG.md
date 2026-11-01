@@ -16,19 +16,32 @@ The repository is being improved incrementally. Original source folders are pres
 | E-commerce-project-springBoot-master | Improved | Externalized datasource credentials and SQL logging defaults; removed predictable demo account seeds; rewrote setup/authentication/security documentation. Source already hashes new passwords with BCrypt and upgrades legacy plain-text records on user load. | Maven build pending; no runtime or database migration test executed. |
 | Train-Ticket-Reservation-System-master | Improved | Added PBKDF2-HMAC-SHA-256 salted password storage; migrate legacy passwords on successful login; corrected INSERT execution; made password change persist and verify old password; moved Oracle credentials to environment variables; removed credential logging; reduced schema grants from DBA; removed public demo account seeds; widened password columns. | Maven build pending; Oracle database and servlet-container workflows not executed. DBUtil still uses a single static connection and needs a connection-pool refactor. |
 | back-end--chat-api | Documentation improved / build blocked | Rewrote README to describe the Spring/Jakarta, DDD and SSE architecture and explicitly record that no Maven/Gradle build descriptor or wrapper is present. | Cannot compile reproducibly until dependency versions and a build descriptor are added. |
+| Graduation-Project-master | Improved / archived multi-project workspace | Replaced generic root README and broken topic READMEs with a verified map; documented the offline GitBook, SQL/Python exercises, legacy Android client, Gradle examples, Struts/Spring/Hibernate SmartHome web application, and research-only WebSocket/WebRTC, web-service, device-presence, server-push, and cloud topics. Removed a hard-coded MySQL account/password from SmartHome Spring XML; added ignored local DB overrides; disabled Hibernate SQL logging and Struts dev mode; removed a private HTTP Maven repository/JCenter from the sample Gradle build; fixed a malformed Android manifest tag. | Not compiled. No root build descriptor; nested examples use legacy toolchains. Credentials removed from current tree may remain in Git history and must be rotated if real. |
+
+## Build verification — Java batch 1
+
+GitHub Actions run: https://github.com/Pudin0120/Portafolio/actions/runs/41273225712
+
+| Project | Result | Scope |
+| --- | --- | --- |
+| Banking Portal API | Success | Maven package with Java 17; test execution skipped. |
+| E-commerce application | Success | Maven package with Java 11; test execution skipped. |
+| Inventory desktop app | Success | Maven package with Java 11; test execution skipped. |
+| Train reservation application | Success | Maven package with Java 8; test execution skipped. |
+
+All four compile/package jobs completed successfully after the Banking Portal import fix. This is a compile/package check only, not functional QA or a security certification.
 
 ## Batch 2 — next review queue
 
 The next projects to inspect are:
 
-1. Graduation-Project-master — large legacy full-stack project; inspect runtime, data handling, dependencies, and deployment files.
-2. JavaCodes — broad set of Java source exercises; identify complete runnable applications and consolidate duplicate/unfinished examples.
-3. onlinebookstore-master — inspect web stack, authentication, database configuration, and checkout/cart flows.
-4. employer-worker-registration-system-main — inspect data validation, account handling, and database access.
-5. WeatherApp-Android-master — inspect Android Gradle configuration, API keys, lifecycle, and network handling.
-6. Women-Safety-App-master — inspect permissions, location/safety workflows, API usage, and privacy.
-7. Lost and Found — inspect persistence, identity handling, and input validation.
-8. Remaining reservation, inventory, education, and CRUD applications — review by completeness and reuse potential.
+1. JavaCodes — inspect 229 Java source files, group runnable applications and exercises, identify build/runtime gaps, and prioritize maintainable projects.
+2. onlinebookstore-master — inspect web stack, authentication, database configuration, and checkout/cart flows.
+3. employer-worker-registration-system-main — inspect data validation, account handling, and database access.
+4. WeatherApp-Android-master — inspect Android Gradle configuration, API keys, lifecycle, and network handling.
+5. Women-Safety-App-master — inspect permissions, location/safety workflows, API usage, and privacy.
+6. Lost and Found — inspect persistence, identity handling, and input validation.
+7. Remaining reservation, inventory, education, and CRUD applications — review by completeness and reuse potential.
 
 ## Engineering baseline for every project
 
@@ -43,7 +56,7 @@ The next projects to inspect are:
 
 ## Security follow-up required
 
-Some credentials removed from current files were already present in previous Git commits. Removing them from the latest version does not erase the old history. Rotate any real credentials that were committed, then consider a coordinated history cleanup only after backups and collaborators are prepared.
+Some credentials removed from current files were already present in previous Git commits (including legacy SQL/database configuration values). Removing them from the latest version does not erase the old history. Rotate any real credentials that were committed, then consider a coordinated history cleanup only after backups and collaborators are prepared.
 
 ## Important status rule
 
