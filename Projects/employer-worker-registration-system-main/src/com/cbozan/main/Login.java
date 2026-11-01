@@ -129,7 +129,7 @@ public class Login extends JFrame{
 					}
 					
 				}
-					java.util.Arrays.fill(passwordChars, '\\0');
+					java.util.Arrays.fill(passwordChars, (char) 0);
 					passwordField_password.setText("");
 				
 			}
