@@ -36,7 +36,7 @@ Create a dedicated local database user and grant it access only to this database
 
 ## 2. Configure the connection
 
-The application reads application.properties from the classpath. The checked-in file contains local connection defaults; override them with environment variables:
+The application reads application.properties from the classpath. The tracked file contains only the JDBC driver; connection URL, username, and password must be provided through environment variables:
 
 | Variable | Purpose |
 | --- | --- |
@@ -82,11 +82,19 @@ The configured JavaFX launcher class is com.inventorymanagementsystem.app.Launch
 
 ## Known limitations to address before production use
 
-- The current login implementation compares the supplied password with the stored database value directly. Do not use real credentials or deploy this application with real users until password hashing, password reset, and a migration strategy are implemented.
+- New passwords should be stored using salted PBKDF2-HMAC-SHA-256 hashes. The login flow now verifies PBKDF2 values and upgrades legacy plaintext values after a successful login when the password is at least eight characters. Short legacy passwords remain verifiable but must be reset before production use.
+- Password reset, registration, and account provisioning are still not implemented in the application UI. Create local test accounts only in a disposable database and use the provided PasswordUtil when generating stored hashes.
 - The demonstration database previously included the public default login admin/admin; that seed account has been removed. Create any local test account only in a disposable local database.
-- Review database transaction boundaries, resource closing, validation, and error handling in the controllers.
+- The login query now uses try-with-resources and a prepared statement; review database transaction boundaries, resource closing, validation, and error handling in the remaining controllers.
 - Keep database access behind a repository/service layer before extending the application.
 - Validate monetary calculations and replace floating-point money values with a decimal type before using real financial records.
+
+## Password hashing verification
+
+A dependency-free smoke test verifies PBKDF2 matching, unique salts, wrong-password rejection, legacy-password verification, and tamper detection:
+
+    javac -d target/password-test src/main/java/com/inventorymanagementsystem/security/PasswordUtil.java tools/PasswordUtilSmokeTest.java
+    java -cp target/password-test com.inventorymanagementsystem.security.PasswordUtilSmokeTest
 
 ## Project attribution
 
