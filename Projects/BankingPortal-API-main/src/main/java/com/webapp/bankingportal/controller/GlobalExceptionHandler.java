@@ -101,12 +101,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PasswordResetException.class)
     public ResponseEntity<String> handlePasswordResetException(PasswordResetException ex, WebRequest request) {
         return ResponseEntity.internalServerError()
-                .body("{\"message\": \"" + ex.getMessage() + "\"}");
+                .body("{\\"message\\": \\"The password reset could not be completed.\\"}");
     }
 
     @ExceptionHandler(RestClientException.class)
     public ResponseEntity<String> handleRestClientException(RestClientException ex) {
-        return ResponseEntity.internalServerError().body(ex.getMessage());
+        return ResponseEntity.internalServerError().body("An external service is temporarily unavailable.");
     }
 
     @ExceptionHandler(UnauthorizedException.class)
@@ -127,6 +127,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGlobalException(Exception ex, WebRequest request) {
         return ResponseEntity.internalServerError()
-                .body("{\"message\": \"An unexpected error occurred: " + ex.getMessage() + "\"}");
+                .body("{\\"message\\": \\"An unexpected error occurred.\\"}");
+    }
+}}");
     }
 }
