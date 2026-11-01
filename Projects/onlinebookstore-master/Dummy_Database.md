@@ -39,10 +39,10 @@ insert into  books values('9781484255995','Practical Rust Projects','Shing Lyu',
 
 insert into  books values('9781484255996','Agni Veena','Kazi Nasrul Islam',259,25);
 
-insert into users values('demo','demo','Demo','User','Demo Home','42502216225','demo@gmail.com',2);
+-- Default demo users removed. Register accounts through the application.
 
-insert into users values('Admin','Admin','Mr.','Admin','Haldia WB','9584552224521','admin@gmail.com',1);
+-- Default demo users removed. Register accounts through the application.
 
-insert into users values('shashi','shashi','Shashi','Raj','Bihar','1236547089','shashi@gmail.com',2);
+-- Default demo users removed. Register accounts through the application.
 
 commit;
