@@ -20,7 +20,7 @@ public final class DB {
         private static final DB INSTANCE = new DB();
     }
 
-    public static Connection getConnection() {
+    public static Connection getConnection() throws SQLException {
         return DBHelper.INSTANCE.connect();
     }
 
@@ -28,29 +28,28 @@ public final class DB {
         DBHelper.INSTANCE.disconnect();
     }
 
-    private synchronized Connection connect() {
+    private synchronized Connection connect() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            return connection;
+        }
+
+        String url = setting("EMPLOYER_DB_URL", "employer.db.url", DEFAULT_URL);
+        String username = setting("EMPLOYER_DB_USER", "employer.db.user", "");
+        String password = setting("EMPLOYER_DB_PASSWORD", "employer.db.password", "");
+
+        if (username.isEmpty() || password.isEmpty()) {
+            ERROR_MESSAGE = "Database credentials are not configured. Set EMPLOYER_DB_USER and EMPLOYER_DB_PASSWORD.";
+            throw new SQLException(ERROR_MESSAGE);
+        }
+
         try {
-            if (connection != null && !connection.isClosed()) {
-                return connection;
-            }
-
-            String url = setting("EMPLOYER_DB_URL", "employer.db.url", DEFAULT_URL);
-            String username = setting("EMPLOYER_DB_USER", "employer.db.user", "");
-            String password = setting("EMPLOYER_DB_PASSWORD", "employer.db.password", "");
-
-            if (username.isEmpty() || password.isEmpty()) {
-                ERROR_MESSAGE = "Database credentials are not configured. Set EMPLOYER_DB_USER and EMPLOYER_DB_PASSWORD.";
-                return null;
-            }
-
             connection = DriverManager.getConnection(url, username, password);
             ERROR_MESSAGE = "";
             return connection;
         } catch (SQLException exception) {
             // Do not expose JDBC URLs, usernames, or passwords in UI messages.
             ERROR_MESSAGE = "Unable to connect to PostgreSQL. Check the database service and EMPLOYER_DB_* settings.";
-            System.err.println(ERROR_MESSAGE);
-            return null;
+            throw new SQLException(ERROR_MESSAGE, exception);
         }
     }
 
