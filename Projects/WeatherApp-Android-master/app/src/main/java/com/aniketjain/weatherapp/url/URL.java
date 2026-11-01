@@ -15,6 +15,7 @@ public class URL {
         link = Uri.parse(API_BASE + "onecall")
                 .buildUpon()
                 .appendQueryParameter("exclude", "minutely")
+                .appendQueryParameter("units", "metric")
                 .appendQueryParameter("lat", LocationCord.lat)
                 .appendQueryParameter("lon", LocationCord.lon)
                 .appendQueryParameter("appid", BuildConfig.WEATHER_API_KEY)
@@ -30,6 +31,7 @@ public class URL {
         return Uri.parse(API_BASE + "weather")
                 .buildUpon()
                 .appendQueryParameter("q", cityName)
+                .appendQueryParameter("units", "metric")
                 .appendQueryParameter("appid", BuildConfig.WEATHER_API_KEY)
                 .build()
                 .toString();
