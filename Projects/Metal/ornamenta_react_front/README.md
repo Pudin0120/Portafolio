@@ -1,90 +1,76 @@
-# Proyecto ServiPerfiles - Frontend React
+# ServiPerfiles — React Frontend
 
-Sistema de gestiAn de users con autenticaciAn Firebase y roles dinAmicos, construido bajo una arquitectura modular orientada a SaaS.
+The frontend is a React single-page application built with TypeScript and Vite. Its repository configuration also includes a PWA service worker and Firebase-based authentication.
 
-## Ys TecnologAas
+## Technology stack
 
-- **React 19** con TypeScript
-- **Vite** como bundler
-- **HeroUI** (ex NextUI) + Tailwind CSS 4
-- **Bun** como gestor de paquetes y runtime
-- **Firebase** para autenticaciAn
-- **Infisical** para gestiAn de secretos
+| Area | Technology |
+| --- | --- |
+| UI | React 19, HeroUI, Tailwind CSS 4 |
+| Language | TypeScript |
+| Development server and bundler | Vite |
+| Authentication | Firebase |
+| Client routing | React Router |
+| PWA | vite-plugin-pwa with a custom service worker |
+| E2E testing | Playwright |
+| Secrets | Infisical CLI |
+| Package manager | Bun |
 
-## Y" Roles del Sistema
+Declared dependency ranges are in package.json; use the repository's Bun lock file to reproduce the resolved dependency set.
 
-| Rol             | Acceso                             |
-| :-------------- | :--------------------------------- |
-| **SUPER_ADMIN** | Control total del sistema          |
-| **MANAGER**     | GestiAn administrativa de users |
-| **SUPERVISOR**  | GestiAn de equipos y tasks        |
-| **EMPLOYEE**    | VisualizaciAn de perfil y nAmina   |
+## Prerequisites
 
-## Y-i Estructura del Proyecto
+- Bun (use the version expected by the project lock file).
+- Infisical CLI.
+- Access to the ServiPerfiles Infisical project and its required frontend variables.
 
-El proyecto sigue una arquitectura modular y escalable. Para mAs detalles tA(c)cnicos sobre la organizaciAn de carpetas y principios de diseAo, consulta:
+Authenticate before running the scripts:
 
-- [Y-i Arquitectura del Proyecto](./ARCHITECTURE.md)
+    infisical auth login
 
-## Y"s DocumentaciAn Adicional
+## Installation and development
 
-- [Y GuAa de Flujo de Work (Git)](./GUIDE.md) - **LEER ANTES DE EMPEZAR**
-- [Y- GuAa para Agentes AI](./AGENTS.md) - EstAndares para desarrollo asistido por IA.
+    bun install
+    bun run dev
 
-## Y" GestiAn de Secretos (Infisical)
+The dev, build, and preview scripts run through Infisical. Make sure the correct project and environment are selected.
 
-Este proyecto utiliza **Infisical** para inyectar variables de entorno de forma segura.
+## Production build and preview
 
-1. Instala [Infisical CLI](https://infisical.com/docs/cli/overview).
-2. Ejecuta `infisical auth login`.
-3. Usa `bun run dev` o `bun run build` para inyectar los secretos automAticamente.
+    bun run build
+    bun run preview
 
-## Y" InstalaciAn y Uso
+## Browser tests
 
-```bash
-# Instalar dependencias
-bun install
+The project declares Playwright scripts:
 
-# Desarrollo
-bun run dev
+    bun run test
+    bun run test:ui
+    bun run test:headed
+    bun run test:report
 
-# Build de producciAn
-bun run build
-```
+Some named test scripts target specific existing test IDs. Check the current test directory before relying on an individual test alias.
 
-## Yi Desarrollo (TypeScript + React 19)
+Install the Playwright browsers when running the suite on a fresh machine:
 
-### Ejemplo de componente profesional:
+    bunx playwright install --with-deps
 
-```tsx
-import { type FC } from "react";
-import { Button } from "@heroui/react";
-import { useAuth } from "@hooks/useAuth";
+## Configuration
 
-interface Props {
-  label: string;
-  onPress?: () => void;
-}
+The checked-in .env.example documents the public Firebase web configuration and VITE_API_URL. Copy it to a local environment file only when using a local workflow, and keep real values out of commits.
 
-export const ActionButton: FC<Props> = ({ label, onPress }) => {
-  const { user } = useAuth();
+Firebase web configuration values are delivered to the browser; they are not server secrets. Protect Firebase resources with Authentication, Security Rules, authorized domains, and appropriate API restrictions. Never place Firebase service-account credentials or private server keys in frontend variables.
 
-  return (
-    <Button color="primary" onPress={onPress}>
-      {label}
-    </Button>
-  );
-};
-```
+The Vite configuration reads VITE_API_URL to configure the development /api proxy. Set it to the backend origin for local development.
 
-## Y API Endpoints
+## Project structure and conventions
 
-Consulta la documentaciAn interna en `src/services/` para ver los servicios disponibles o espera a la prAxima actualizaciAn de la **GuAa de Endpoints**.
+- Read [ARCHITECTURE.md](./ARCHITECTURE.md) before changing feature boundaries.
+- Follow [GUIDE.md](./GUIDE.md) for the repository's Git workflow.
+- Follow [AGENTS.md](./AGENTS.md) for coding conventions used by the project.
+- Keep API access in service modules and reuse the existing authentication and role-management hooks.
+- Add or update Playwright coverage for user-visible flows.
 
-## Y' Contribuir
+## Scope note
 
-1. Asegurate de estar en la rama `dev`.
-2. CreA una rama nueva con el prefijo correspondiente: `git checkout -b feature/nombre-mejora`.
-3. SeguA las normas de commit y flujo explicadas en [GUIDE.md](./GUIDE.md).
-4. AbrA un Pull Request hacia `dev`.
-
+The project documentation describes a role-based workforce/workshop management application. Confirm available API endpoints and permissions in the current source before integrating a new screen or assuming an endpoint exists.
