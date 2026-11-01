@@ -33,6 +33,8 @@ jobs:
           cache-dependency-path: Projects/BankingPortal-API-main/pom.xml
       - name: Compile and package
         run: mvn -B -f Projects/BankingPortal-API-main/pom.xml -DskipTests package
+      - name: Run focused OTP tests
+        run: mvn -B -f Projects/BankingPortal-API-main/pom.xml -Dtest=OtpServiceTests test
 
   ecommerce:
     name: E-commerce application (Java 11)
