@@ -8,7 +8,7 @@
     <string name="title_activity_display">Display</string>
     <string name="title_activity_instructions">Instructions</string>
     <string name="title_activity_verify">Verify</string>
-    <string name="help">Please follow the below steps to setup your account:\n\n\n\t1:Register Your Phone Number.\n\t2:Register Your Guardian Numbers.\n\t3:Always maintain working internet connection.\n\t4:SHAKE your phone in case of emergency to alert your guardians.\n\t\n\n\n\n\tLETS START NOW!</string>
+    <string name="help">This is an experimental emergency-contact prototype.\n\n1. Register up to two trusted contacts.\n2. Save your own phone number for reference.\n3. View and verify the saved details.\n\nImportant: shake detection and automatic SMS alerts are not implemented as a reliable emergency workflow. Do not rely on this app to contact emergency services or trusted contacts.</string>
     
 
 </resources>
