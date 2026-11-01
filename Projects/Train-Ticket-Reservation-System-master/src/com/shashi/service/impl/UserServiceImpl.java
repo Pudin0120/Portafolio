@@ -141,6 +141,9 @@ public class UserServiceImpl implements UserService {
                 + " (MAILID, PWORD, FNAME, LNAME, ADDR, PHNO) VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
+            if (customer.getPWord() == null || customer.getPWord().length() < 8) {
+                return "Password must contain at least 8 characters.";
+            }
             String encodedPassword = PasswordUtil.hash(customer.getPWord());
             Connection connection = DBUtil.getConnection();
 
