@@ -22,8 +22,7 @@
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <div class="form-group">
                 <label for="firstName">User Name</label>
-                <input type="hidden" name="userid" value="${userid }">
-                <input type="text" name="username" id="firstName" required placeholder="Your Username*" value="${username }" required class="form-control form-control-lg">
+                    <input type="text" name="username" id="firstName" required placeholder="Your Username*" value="${username }" required class="form-control form-control-lg">
             </div>
             <div class="form-group">
                 <label for="email">Email address</label>
