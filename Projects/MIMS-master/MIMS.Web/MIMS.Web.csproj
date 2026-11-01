@@ -875,6 +875,7 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\messages_zh.js" />
     <Content Include="Web.config" />
+    <Content Include="connectionStrings.config" Condition="Exists('connectionStrings.config')" />
     <Content Include="Views\User\Login.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
