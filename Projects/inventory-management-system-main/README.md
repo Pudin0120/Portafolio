@@ -1,63 +1,93 @@
-# inventory-management-system-main
+# Inventory Management System
 
-## Description
-Project inventory-management-system-main: management system built with Java, HTML/CSS, XML, SQL. This folder contains the source code and resources needed to review, run, and adapt the solution as part of the portfolio.
+A JavaFX desktop application for inventory, customers, purchases, sales, billing, and invoice/report workflows. The source includes JavaFX views and controllers, entity classes, JasperReports templates, a MySQL JDBC configuration, and a SQL database dump.
 
-## What It Does
-- Provides a practical solution related to the project name: inventory-management-system-main.
-- Includes source files, resources, and configuration needed to study or run the application.
-- Works as an individual project entry in Joseff Antonio Laverde Avendano's portfolio.
+## Technology stack
 
-## Detected Technologies
-- Java
-- HTML/CSS
-- XML
-- SQL
+| Technology | Version / detail |
+| --- | --- |
+| Java | 11 (Maven compiler release) |
+| JavaFX | 11.0.2 |
+| Build | Maven |
+| MySQL JDBC driver | 8.0.33 |
+| UI libraries | ControlsFX, FormsFX, ValidatorFX, Ikonli, TilesFX |
+| Reporting | JasperReports 6.20.5 |
+| Tests | JUnit Jupiter 5.7.1 dependencies are declared |
 
-## Requirements
-- JDK 8 or newer
-- A database engine compatible with the included SQL scripts
+The Maven configuration includes several additional reporting, document, and database libraries. Their versions are managed in pom.xml.
 
-## Installation
-1. Clone or download this portfolio repository.
-2. Open the Projects/inventory-management-system-main folder.
-3. Download dependencies and build with `mvn clean install`.
+## Prerequisites
 
-## Usage
-- `mvn clean install`
-- `mvn exec:java  # if the pom defines a main class`
+- JDK 11
+- Maven (or use the Maven Wrapper if one is added)
+- MySQL or a compatible MariaDB server
+- A database client to load the provided schema
 
-## Main Structure
-- `.gitignore`
-- `database/inventory_management_system.sql`
-- `dependency-reduced-pom.xml`
-- `pom.xml`
-- `README.md`
-- `src/main/java/com/inventorymanagementsystem/app/Launcher.java`
-- `src/main/java/com/inventorymanagementsystem/Application.java`
-- `src/main/java/com/inventorymanagementsystem/BillsController.java`
-- `src/main/java/com/inventorymanagementsystem/config/Database.java`
-- `src/main/java/com/inventorymanagementsystem/DashboardController.java`
-- `src/main/java/com/inventorymanagementsystem/entity/Billing.java`
-- `src/main/java/com/inventorymanagementsystem/entity/Customer.java`
-- `src/main/java/com/inventorymanagementsystem/entity/Invoice.java`
-- `src/main/java/com/inventorymanagementsystem/entity/Product.java`
-- `src/main/java/com/inventorymanagementsystem/entity/Purchase.java`
-- `src/main/java/com/inventorymanagementsystem/entity/Sales.java`
-- `src/main/java/com/inventorymanagementsystem/entity/User.java`
-- `src/main/java/com/inventorymanagementsystem/LoginController.java`
-- `src/main/java/module-info.java`
-- `src/main/resources/application.properties`
-- `src/main/resources/com/inventorymanagementsystem/bills.css`
-- `src/main/resources/com/inventorymanagementsystem/bills.fxml`
-- `src/main/resources/com/inventorymanagementsystem/dashboard.css`
-- `src/main/resources/com/inventorymanagementsystem/dashboard.fxml`
-- `src/main/resources/com/inventorymanagementsystem/login.css`
+The included SQL dump records MariaDB 10.4.21 as its source server. Validate the schema on your chosen database version before using it with important data.
 
-## Notes
-- If the project uses a database, review the `.sql` files, connection properties, or internal documentation before running it.
-- If compiled output exists (.class, 	arget, build, bin), rebuild from source to ensure compatibility with your local environment.
-- Some academic projects may need to be opened with an IDE such as NetBeans, Eclipse, IntelliJ IDEA, or Android Studio.
+## 1. Create the database
 
-## Author
-Joseff Antonio Laverde Avendano
+Create the database and import the SQL dump:
+
+    mysql -u root -p -e "CREATE DATABASE inventory_management_system CHARACTER SET utf8mb4;"
+    mysql -u root -p inventory_management_system < database/inventory_management_system.sql
+
+Create a dedicated local database user and grant it access only to this database. Do not use the database root account for the application.
+
+## 2. Configure the connection
+
+The application reads application.properties from the classpath. The checked-in file contains local connection defaults; override them with environment variables:
+
+| Variable | Purpose |
+| --- | --- |
+| DB_DRIVER | JDBC driver class |
+| DB_URL | JDBC connection URL |
+| DB_USERNAME | Database user |
+| DB_PASSWORD | Database password |
+
+Example for a local MySQL instance:
+
+    DB_URL=jdbc:mysql://127.0.0.1:3306/inventory_management_system
+    DB_USERNAME=inventory_user
+    DB_PASSWORD=your-local-password
+
+Set these variables in your operating system or IDE run configuration. Do not commit personal credentials.
+
+## 3. Build and run
+
+From this directory:
+
+    mvn clean package
+    mvn javafx:run
+
+The configured JavaFX launcher class is com.inventorymanagementsystem.app.Launcher. The Maven Shade configuration also defines an executable JAR artifact; verify the generated artifact name in target/ after packaging.
+
+## Main features visible in the source
+
+- Login screen and dashboard navigation.
+- Product inventory listing and item lookup.
+- Customer records.
+- Purchase and sales records.
+- Billing and invoice search/printing.
+- Dashboard totals and monthly summaries.
+- JasperReports-based customer, sales, purchase, and invoice reports.
+
+## Source layout
+
+- src/main/java/com/inventorymanagementsystem — application and JavaFX controllers.
+- src/main/java/com/inventorymanagementsystem/entity — product, customer, invoice, sales, purchase, billing, and user models.
+- src/main/java/com/inventorymanagementsystem/config — JDBC connection setup.
+- src/main/resources — FXML, CSS, and application configuration.
+- database — database schema and example records.
+
+## Known limitations to address before production use
+
+- The current login implementation compares the supplied password with the stored database value directly. Do not use real credentials or deploy this application with real users until password hashing, password reset, and a migration strategy are implemented.
+- The demonstration database previously included the public default login admin/admin; that seed account has been removed. Create any local test account only in a disposable local database.
+- Review database transaction boundaries, resource closing, validation, and error handling in the controllers.
+- Keep database access behind a repository/service layer before extending the application.
+- Validate monetary calculations and replace floating-point money values with a decimal type before using real financial records.
+
+## Project attribution
+
+This project is preserved under the original directory name in Joseff Laverde's portfolio repository. Review the included source and license metadata before redistribution.
