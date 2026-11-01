@@ -248,7 +248,7 @@ public class HomeActivity extends AppCompatActivity {
                 min_temperature = String.format("%.0f", response.getJSONArray("daily").getJSONObject(0).getJSONObject("temp").getDouble("min"));
                 max_temperature = String.format("%.0f", response.getJSONArray("daily").getJSONObject(0).getJSONObject("temp").getDouble("max"));
                 pressure = response.getJSONArray("daily").getJSONObject(0).getString("pressure");
-                wind_speed = String.valueOf(response.getJSONArray("daily").getJSONObject(0).getDouble("wind_speed") * 3.6);
+                wind_speed = String.format(Locale.getDefault(), "%.0f", response.getJSONArray("daily").getJSONObject(0).getDouble("wind_speed") * 3.6);
                 humidity = response.getJSONArray("daily").getJSONObject(0).getString("humidity");
 
                 updateUI();
@@ -281,8 +281,8 @@ public class HomeActivity extends AppCompatActivity {
                 ));
         binding.layout.conditionDescTv.setText(description);
         binding.layout.tempTv.setText(temperature + " °C");
-        binding.layout.minTempTv.setText(min_temperature + " degC");
-        binding.layout.maxTempTv.setText(max_temperature + " degC");
+        binding.layout.minTempTv.setText(min_temperature + " °C");
+        binding.layout.maxTempTv.setText(max_temperature + " °C");
         binding.layout.pressureTv.setText(pressure + " mb");
         binding.layout.windTv.setText(wind_speed + " km/h");
         binding.layout.humidityTv.setText(humidity + "%");
