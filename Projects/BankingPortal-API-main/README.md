@@ -1,61 +1,112 @@
-# BankingPortal-API-main
+# Banking Portal API
 
-## Description
-Project BankingPortal-API-main: management system built with Java, XML, DevOps/Cloud. This folder contains the source code and resources needed to review, run, and adapt the solution as part of the portfolio.
+A Spring Boot REST API project for a banking portal. The source tree contains authentication and password-reset controllers, account and transaction services, user/account entities, JWT security, email/OTP support, MySQL persistence, and Redis-backed cache components.
 
-## What It Does
-- Provides a practical solution related to the project name: BankingPortal-API-main.
-- Includes source files, resources, and configuration needed to study or run the application.
-- Works as an individual project entry in Joseff Antonio Laverde Avendano's portfolio.
+## Technology stack
 
-## Detected Technologies
-- Java
-- XML
-- DevOps/Cloud
+| Component | Version / dependency |
+| --- | --- |
+| Java | 17 |
+| Spring Boot | 3.3.1 |
+| Build | Maven Wrapper |
+| Database | MySQL 8.0 |
+| Cache | Redis 7 |
+| Security | Spring Security, JWT (JJWT 0.11.5), BCrypt |
+| API documentation | Springdoc OpenAPI |
+| Tests | Spring Boot Test, MockMvc, GreenMail |
 
-## Requirements
-- JDK 8 or newer
+The versions above are read from the project POM and Compose configuration. Transitive dependencies are resolved by Maven.
 
-## Installation
-1. Clone or download this portfolio repository.
-2. Open the Projects/BankingPortal-API-main folder.
-3. Download dependencies and build with `mvn clean install`.
+## Prerequisites
 
-## Usage
-- `mvn clean install`
-- `mvn exec:java  # if the pom defines a main class`
+- JDK 17
+- Docker Engine and Docker Compose
+- The Maven Wrapper included in this folder
 
-## Main Structure
-- `.gitignore`
-- `.mvn/wrapper/maven-wrapper.jar`
-- `.mvn/wrapper/maven-wrapper.properties`
-- `Banking Portal.postman_collection.json`
-- `CODE_OF_CONDUCT.md`
-- `CONTRIBUTING.md`
-- `docker/docker-compose.yml`
-- `Dockerfile`
-- `LICENSE`
-- `mvnw`
-- `mvnw.cmd`
-- `pom.xml`
-- `README.md`
-- `SECURITY.md`
-- `src/main/java/com/webapp/bankingportal/BankingportalApplication.java`
-- `src/main/java/com/webapp/bankingportal/config/CacheConfig.java`
-- `src/main/java/com/webapp/bankingportal/config/CorsConfig.java`
-- `src/main/java/com/webapp/bankingportal/config/RedisConfig.java`
-- `src/main/java/com/webapp/bankingportal/config/SwaggerConfig.java`
-- `src/main/java/com/webapp/bankingportal/config/WebSecurityConfig.java`
-- `src/main/java/com/webapp/bankingportal/controller/AccountController.java`
-- `src/main/java/com/webapp/bankingportal/controller/AuthController.java`
-- `src/main/java/com/webapp/bankingportal/controller/DashboardController.java`
-- `src/main/java/com/webapp/bankingportal/controller/GlobalExceptionHandler.java`
-- `src/main/java/com/webapp/bankingportal/controller/UserController.java`
+## 1. Configure local infrastructure
 
-## Notes
-- If the project uses a database, review the `.sql` files, connection properties, or internal documentation before running it.
-- If compiled output exists (.class, 	arget, build, bin), rebuild from source to ensure compatibility with your local environment.
-- Some academic projects may need to be opened with an IDE such as NetBeans, Eclipse, IntelliJ IDEA, or Android Studio.
+From this project directory, copy the example variables file to the repository root:
 
-## Author
-Joseff Antonio Laverde Avendano
+    cp docker/.env.example .env
+
+Replace the example passwords with strong, unique local values. The Compose file binds MySQL and Redis to 127.0.0.1 so these development services are not exposed on every network interface.
+
+Start the infrastructure:
+
+    docker compose -f docker/docker-compose.yml up -d
+
+Check service status:
+
+    docker compose -f docker/docker-compose.yml ps
+
+This Compose file starts MySQL and Redis; it does not start the Spring Boot API.
+
+## 2. Configure the API
+
+Copy the sample configuration:
+
+    cp src/main/resources/application.properties.sample src/main/resources/application.properties
+
+Set the required variables in your local environment before starting the API:
+
+- DB_URL
+- DB_USERNAME
+- DB_PASSWORD
+- JWT_SECRET
+- MAIL_USERNAME
+- MAIL_PASSWORD
+- GEO_API_KEY
+
+Optional variables include SERVER_PORT, APP_CORS_ALLOWED_ORIGINS, JWT_EXPIRATION, MAIL_HOST, MAIL_PORT, and GEO_API_URL.
+
+Use a long, randomly generated JWT signing secret. Keep the local application.properties and .env files out of version control. Never reuse the example values as production credentials.
+
+## 3. Build and run
+
+Build the application:
+
+    ./mvnw clean package
+
+Run the packaged application:
+
+    java -jar target/bankingportal-0.0.1-SNAPSHOT.jar
+
+The default API port is 8180. The OpenAPI UI is normally available at:
+
+    http://localhost:8180/swagger-ui/index.html
+
+The actual API endpoints and authorization requirements are defined by the controllers and security configuration.
+
+## 4. Tests
+
+Run the automated test suite:
+
+    ./mvnw test
+
+The test sources use Spring Boot Test and MockMvc. Ensure the test-specific Spring configuration and any required external services are available before interpreting a test failure as an application defect.
+
+## Project structure
+
+- config — CORS, security, cache, Redis, and API documentation configuration.
+- controller — HTTP endpoints and centralized exception handling.
+- dto — request and response contracts.
+- entity — persistence/domain entities.
+- exception — application-specific exceptions.
+- mapper — object mapping.
+- repository — Spring Data repositories.
+- security — JWT authentication filter and entry point.
+- service — account, authentication, transaction, OTP, email, cache, and user workflows.
+- util — shared utility classes.
+- src/test — controller, service, cache, token, and exception tests.
+
+## Security and operational notes
+
+- CORS now uses a comma-separated allow-list configured by APP_CORS_ALLOWED_ORIGINS; do not set it to a wildcard for credentialed production clients.
+- Only the Actuator health endpoint is intentionally public through the security filter chain. Keep other management endpoints protected.
+- Database, mail, geolocation, and JWT credentials must be provided through environment variables or a secrets manager.
+- The Docker Compose database and cache ports are bound to localhost for local development. Add authentication, TLS, private networking, backups, and monitored health checks before any non-local deployment.
+- The sample configuration is for local development. Review database schema/migration strategy, token lifecycle, rate limits, and audit logging before using the project with real financial data.
+
+## License and attribution
+
+See the LICENSE file in this directory for the project's licensing terms.
