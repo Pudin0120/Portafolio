@@ -172,8 +172,8 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`) VALUES
-(1, 'admin', 'admin');
+-- No default user is seeded. Create a disposable local demo account only after
+-- implementing password hashing in the application authentication flow.
 
 --
 -- Indexes for dumped tables
