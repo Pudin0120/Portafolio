@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { projects } from '../../data/projects';
 export function getStaticPaths() { return projects.map((project)=>({params:{slug:project.slug},props:{project}})); }
 const {project}=Astro.props;
-const base=import.meta.env.BASE_URL;
+const base=import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 ---
 <BaseLayout title={`${project.title} | Joseff Laverde`} description={project.summary}>
 <section class="section-wrap detail-page"><a class="back-link" href={`${base}proyectos/`}>← Volver a proyectos</a><p class="eyebrow">{project.categoryLabel} / {project.classification}</p><h1>{project.title}</h1><p class="detail-lead">{project.summary}</p>
