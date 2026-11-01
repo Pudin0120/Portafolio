@@ -73,47 +73,92 @@ public class LoginController implements Initializable {
         System.exit(0);
     }
 
-    public void login(){
-        connection= Database.getInstance().connectDB();
-        String sql="SELECT * FROM users WHERE username=? and password=?";
-        try{
-            preparedStatement=connection.prepareStatement(sql);
-            preparedStatement.setString(1,username.getText());
-            preparedStatement.setString(2, password.getText());
-            resultSet=preparedStatement.executeQuery();
-            if(resultSet.next()){
-                User.name=username.getText();
-                Alert alert=new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Success Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Login Successful !");
-                alert.showAndWait();
-                login_btn.getScene().getWindow().hide();
-                Parent root = FXMLLoader.load(getClass().getResource("dashboard.fxml"));
-                Scene scene = new Scene(root);
-                Stage stage=new Stage();
+    public void login() {
+        String enteredUsername = username.getText() == null ? "" : username.getText().trim();
+        char[] passwordChars = password.getText() == null
+                ? new char[0]
+                : password.getText().toCharArray();
 
-                root.setOnMousePressed((event)->{
-                    x=event.getSceneX();
-                    y=event.getSceneY();
-                });
-                root.setOnMouseDragged((event)->{
-                    stage.setX(event.getScreenX()-x);
-                    stage.setY(event.getScreenY()-y);
-                });
-                stage.initStyle(StageStyle.TRANSPARENT);
-                stage.setScene(scene);
-                stage.show();
-            }else{
-                Alert alert=new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Wrong Username/Password");
-                alert.showAndWait();
-            }
-        }catch (Exception err){
-            err.printStackTrace();
+        if (enteredUsername.isEmpty() || passwordChars.length == 0) {
+            showLoginError("Enter your username and password.");
+            java.util.Arrays.fill(passwordChars, (char) 0);
+            password.clear();
+            return;
         }
+
+        String enteredPassword = new String(passwordChars);
+        try (Connection dbConnection = Database.getInstance().connectDB()) {
+            if (dbConnection == null) {
+                showLoginError("Database connection unavailable. Check DB_URL, DB_USERNAME, and DB_PASSWORD.");
+                return;
+            }
+
+            String storedPassword = null;
+            try (PreparedStatement query = dbConnection.prepareStatement(
+                    "SELECT password FROM users WHERE username = ?")) {
+                query.setString(1, enteredUsername);
+                try (ResultSet result = query.executeQuery()) {
+                    if (result.next()) {
+                        storedPassword = result.getString("password");
+                    }
+                }
+            }
+
+            if (!com.inventorymanagementsystem.security.PasswordUtil.matches(
+                    enteredPassword, storedPassword)) {
+                showLoginError("Invalid username or password.");
+                return;
+            }
+
+            if (!com.inventorymanagementsystem.security.PasswordUtil.isEncoded(storedPassword)
+                    && enteredPassword.length() >= 8) {
+                String upgradedHash = com.inventorymanagementsystem.security.PasswordUtil.hash(enteredPassword);
+                try (PreparedStatement upgrade = dbConnection.prepareStatement(
+                        "UPDATE users SET password = ? WHERE username = ? AND password = ?")) {
+                    upgrade.setString(1, upgradedHash);
+                    upgrade.setString(2, enteredUsername);
+                    upgrade.setString(3, storedPassword);
+                    upgrade.executeUpdate();
+                }
+            }
+
+            User.name = enteredUsername;
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success Message");
+            alert.setHeaderText(null);
+            alert.setContentText("Login Successful!");
+            alert.showAndWait();
+
+            login_btn.getScene().getWindow().hide();
+            Parent root = FXMLLoader.load(getClass().getResource("dashboard.fxml"));
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+
+            root.setOnMousePressed(event -> {
+                x = event.getSceneX();
+                y = event.getSceneY();
+            });
+            root.setOnMouseDragged(event -> {
+                stage.setX(event.getScreenX() - x);
+                stage.setY(event.getScreenY() - y);
+            });
+            stage.initStyle(StageStyle.TRANSPARENT);
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception exception) {
+            showLoginError("Unable to sign in. Check the database and try again.");
+        } finally {
+            java.util.Arrays.fill(passwordChars, (char) 0);
+            password.clear();
+        }
+    }
+
+    private void showLoginError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Login");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @Override
