@@ -1,60 +1,75 @@
-# Women-Safety-App-master
+# Women Safety App — Android Prototype
 
-## Description
-Project Women-Safety-App-master: application built with Java, XML. This folder contains the source code and resources needed to review, run, and adapt the solution as part of the portfolio.
+An experimental Android application for storing up to two trusted contacts and a reference phone number. The source also contains an older accelerometer and location-service experiment, but the emergency-alert workflow is **not complete**.
 
-## What It Does
-- Provides a practical solution related to the project name: Women-Safety-App-master.
-- Includes source files, resources, and configuration needed to study or run the application.
-- Works as an individual project entry in Joseff Antonio Laverde Avendano's portfolio.
+> **Safety notice:** This is an academic prototype, not a dependable personal-safety or emergency-response product. It does not currently send SMS alerts, call emergency services, or guarantee background shake detection. Do not rely on it during an emergency.
 
-## Detected Technologies
-- Java
-- XML
+## Technology stack
+
+| Component | Version / detail |
+| --- | --- |
+| Language | Java 8 |
+| Android Gradle Plugin | 7.4.2 |
+| Gradle | 7.5 |
+| Compile SDK | 33 |
+| Minimum SDK | 19 |
+| Target SDK | 22 (legacy compatibility only) |
+| Local persistence | Android SQLite |
+| Support library | Android Support v4 19.1.0 |
 
 ## Requirements
-- JDK 8 or newer
 
-## Installation
-1. Clone or download this portfolio repository.
-2. Open the Projects/Women-Safety-App-master folder.
-3. Build with Gradle using `./gradlew build` or `gradlew.bat build` on Windows.
+- JDK 11
+- Android SDK Platform 33
+- Gradle 7.5
+- Android emulator or device for manual testing
 
-## Usage
-- `.\gradlew.bat build`
-- `.\gradlew.bat run  # if the project defines a run task`
+The Gradle wrapper scripts are present, but gradle-wrapper.jar is not included. Install Gradle 7.5 or use Android Studio's configured Gradle installation.
 
-## Main Structure
-- `.DS_Store`
-- `app/build.gradle`
-- `app/src/main/AndroidManifest.xml`
-- `app/src/main/java/com/prabhu/womensafetyapp/AccelerometerListener.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/AccelerometerManager.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/BgService.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/Display.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/GPSTracker.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/Instructions.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/MainActivity.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/Register.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/RGeocoder.java`
-- `app/src/main/java/com/prabhu/womensafetyapp/Verify.java`
-- `app/src/main/res/drawable-hdpi/ic_launcher.png`
-- `app/src/main/res/drawable-mdpi/ic_launcher.png`
-- `app/src/main/res/drawable-xhdpi/ic_launcher.png`
-- `app/src/main/res/drawable-xxhdpi/ic_launcher.png`
-- `app/src/main/res/layout/activity_display.xml`
-- `app/src/main/res/layout/activity_instructions.xml`
-- `app/src/main/res/layout/activity_main.xml`
-- `app/src/main/res/layout/activity_register.xml`
-- `app/src/main/res/layout/activity_verify.xml`
-- `app/src/main/res/menu/display.xml`
-- `app/src/main/res/menu/instructions.xml`
-- `app/src/main/res/menu/main.xml`
+## Build
 
-## Notes
-- If the project uses a database, review the `.sql` files, connection properties, or internal documentation before running it.
-- If compiled output exists (.class, 	arget, build, bin), rebuild from source to ensure compatibility with your local environment.
-- Some academic projects may need to be opened with an IDE such as NetBeans, Eclipse, IntelliJ IDEA, or Android Studio.
+From this directory:
+
+    gradle --version
+    gradle --no-daemon :app:assembleDebug
+
+The debug APK is generated at:
+
+    app/build/outputs/apk/debug/app-debug.apk
+
+The repository's GitHub Actions workflow also runs this build with Gradle 7.5 and Java 11.
+
+## Current functionality
+
+- Register up to two trusted contacts.
+- Register a reference phone number.
+- Display locally stored contact details.
+- Retain the original experimental accelerometer, GPS, and reverse-geocoding source files for study.
+
+## Improvements in this revision
+
+- Replaced the invalid Android Gradle plugin version and removed the retired JCenter repository.
+- Moved the build to a reproducible Gradle 7.5 / Android Gradle Plugin 7.4.2 configuration.
+- Added an Android namespace and explicit exported settings for application components.
+- Disabled Android application backup for locally stored contact data.
+- Removed unused SMS and phone-state permissions because no SMS sending implementation is active.
+- Added phone-number and contact-name validation.
+- Replaced SQL string concatenation with ContentValues-based SQLite inserts.
+- Enforced the documented two-contact limit by replacing the oldest saved contact.
+- Closed database cursors and connections reliably.
+- Prevented opening the contact list from unexpectedly starting background sensor monitoring.
+- Rewrote the in-app instructions so they do not falsely promise emergency SMS alerts.
+
+## Important limitations before any real-world use
+
+- The SMS-sending code in the original service is commented out. No emergency message is delivered.
+- The accelerometer service is an unfinished experiment and is not connected to the main screen as an explicit, user-controlled safety mode.
+- The target SDK is intentionally kept at 22 to preserve the old permission model while the project is being stabilized. This is not suitable for a modern Google Play release.
+- Before raising target SDK, implement and test runtime permission flows, foreground-service behavior, notification controls, and Android background-execution requirements.
+- Do not collect, transmit, or store location data until the user has clearly opted in and the data handling is documented.
+- Add automated tests for contact validation, storage limits, and database migration.
+- Replace the legacy Support Library with AndroidX in a dedicated migration.
 
 ## Author
-Joseff Antonio Laverde Avendano
+
+Joseff Antonio Laverde Avendaño
