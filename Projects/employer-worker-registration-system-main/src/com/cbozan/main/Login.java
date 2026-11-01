@@ -17,7 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import com.cbozan.dao.LoginDAO; 
+import com.cbozan.dao.LoginDAO;
+import com.cbozan.dao.DB; 
 
 public class Login extends JFrame{
 
@@ -125,7 +126,7 @@ public class Login extends JFrame{
 						});
 						
 					} else {
-						label_errorText.setText(errorText);
+						label_errorText.setText(DB.ERROR_MESSAGE.isEmpty() ? errorText : DB.ERROR_MESSAGE);
 					}
 					
 				}
