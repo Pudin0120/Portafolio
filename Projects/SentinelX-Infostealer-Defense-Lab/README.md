@@ -36,7 +36,7 @@ Design, implement, and evaluate a hybrid detection platform that combines:
 | Observability | OpenTelemetry, Prometheus, Grafana, Loki | Traces, metrics, dashboards, structured logs |
 | Delivery and security | Docker Compose, GitHub Actions, Semgrep, Trivy | Reproducible local environment and secure CI checks |
 
-Versions will be pinned to mutually compatible stable releases during implementation and recorded in lockfiles/container tags. The proposal intentionally avoids floating production dependencies.
+Candidate upstream versions observed on 2026-11-03 are recorded in [Technology Baseline](docs/TECHNOLOGY-BASELINE.md). They must pass cross-stack compatibility and CI checks before being pinned; the proposal avoids floating production dependencies.
 
 ## Core capabilities
 
